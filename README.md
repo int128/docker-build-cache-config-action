@@ -1,4 +1,4 @@
-# docker-cache-params-action [![ts](https://github.com/int128/docker-cache-params-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/docker-cache-params-action/actions/workflows/ts.yaml)
+# docker-build-cache-config-action [![ts](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml)
 
 This is an action to provide `cache-from` and `cache-to` parameters to [docker/build-push-action](https://github.com/docker/build-push-action) for effective build cache.
 
@@ -69,8 +69,8 @@ jobs:
         id: metadata
         with:
           images: ghcr.io/${{ github.repository }}
-      - uses: int128/docker-cache-params-action@v1
-        id: cache-params
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
         with:
           image: ghcr.io/${{ github.repository }}/cache
       - uses: docker/login-action@v1
@@ -85,8 +85,8 @@ jobs:
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: ${{ steps.cache-params.outputs.cache-from }}
-          cache-to: ${{ steps.cache-params.outputs.cache-to }}
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
 For monorepo, you can set a tag prefix to isolate caches.
