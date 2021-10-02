@@ -13,19 +13,19 @@ cache-from: type=registry,ref=IMAGE
 cache-to: type=registry,ref=IMAGE,mode=max
 ```
 
-In pull request based development flow, cache efficiency would be extremely decreased.
+In pull request based development flow, cache is overwritten by pull requests and it would decrease cache efficiency.
 For example,
 
-1. Cache is created from `main` branch
+1. Cache is created from main branch
 1. When pull request A is opened,
     - Cache hit
     - Cache is overwritten to the branch of A
-1. When pull request B is opened, cache is missed
+1. When pull request B is opened,
     - Cache miss
     - Cache is overwritten to the branch of B
 1. When pull request A is merged into main,
     - Cache miss
-    - Cache is overwritten to `main` branch
+    - Cache is overwritten to main branch
 
 
 ## Solution
