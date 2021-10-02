@@ -1,9 +1,20 @@
-name: hello-world
-description: say Hello World
+name: docker-cache-params
+description: Provide `cache-from` and `cache-to` to docker/build-push-action for effective build cache
+
 inputs:
-  name:
-    description: example input
+  image:
+    description: image name to import/export cache
     required: true
+  tag-prefix:
+    description: prefix of image tag
+    required: false
+
+outputs:
+  cache-from:
+    description: cache-from parameter
+  cache-to:
+    description: cache-to parameter
+
 runs:
   using: 'node12'
   main: 'dist/index.js'
