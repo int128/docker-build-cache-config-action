@@ -1,10 +1,13 @@
 import * as core from '@actions/core'
 import { run } from './run'
 
-const main = async (): Promise<void> => {
-  await run({
-    name: core.getInput('name', { required: true }),
+const main = (): void => {
+  const outputs = run({
+    image: core.getInput('image', { required: true }),
+    tagPrefix: core.getInput('tag-prefix'),
   })
+  core.setOutput('cache-from', outputs.cacheFrom)
+  core.setOutput('cache-to', outputs.cacheTo)
 }
 
-main().catch((error) => core.setFailed(error))
+main()

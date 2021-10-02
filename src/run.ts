@@ -1,10 +1,20 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
+import * as cache from './cache'
 
-type Inputs = {
-  name: string
+export type Inputs = cache.Inputs
+
+type Outputs = {
+  cacheFrom: string
+  cacheTo: string
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export const run = async (inputs: Inputs): Promise<void> => {
-  core.info(`my name is ${inputs.name}`)
+export const run = (inputs: Inputs): Outputs => {
+  const c = cache.infer(github.context, inputs)
+  core.info(`Inferred cache: from=${c.from}, to=${c.to ?? 'null'}`)
+
+  return {
+    cacheFrom: `type=registry,ref=${c.from}`,
+    cacheTo: c.to !== null ? `type=registry,ref=${c.to},mode=max` : '',
+  }
 }

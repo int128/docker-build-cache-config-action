@@ -36,7 +36,9 @@ jobs:
       - run: yarn build
       - run: yarn package
 
-      - name: e2e-test
+      - id: cache-params
         uses: ./
         with:
-          name: foo
+          image: ghcr.io/${{ github.repository }}/cache
+      - run: echo cache-from=${{ steps.cache-params.outputs.cache-from }}
+      - run: echo cache-to=${{ steps.cache-params.outputs.cache-to }}
