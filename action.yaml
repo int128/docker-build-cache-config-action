@@ -1,5 +1,5 @@
-name: docker-cache-params
-description: Provide `cache-from` and `cache-to` to docker/build-push-action for effective build cache
+name: docker-build-cache-config
+description: Effective cache with docker/build-push-action for pull request based development flow
 
 inputs:
   image:
