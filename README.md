@@ -1,6 +1,6 @@
 # docker-build-cache-config-action [![ts](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml)
 
-This is an action to generate `cache-from` and `cache-to` parameters for [docker/build-push-action](https://github.com/docker/build-push-action).
+This is an action to generate `cache-from` and `cache-to` inputs of [docker/build-push-action](https://github.com/docker/build-push-action) for effective cache in pull request based development flow.
 
 
 ## Problem to solve
@@ -13,26 +13,33 @@ cache-from: type=registry,ref=IMAGE
 cache-to: type=registry,ref=IMAGE,mode=max
 ```
 
-In pull request based development flow, cache is overwritten by pull requests and it would decrease cache efficiency.
+In pull request based development flow, cache is overwritten by pull requests and it causes cache miss.
 For example,
 
-1. Cache is created from main branch
-1. When pull request A is opened,
-    - Cache hit
-    - Cache is overwritten to the branch of A
+1. Initially cache is set to `main` branch
 1. When pull request B is opened,
+    - Cache hit
+    - Cache is overwritten to B
+1. When pull request C is opened,
     - Cache miss
-    - Cache is overwritten to the branch of B
-1. When pull request A is merged into main,
+    - Cache is overwritten to C
+1. When pull request B is merged into main,
     - Cache miss
-    - Cache is overwritten to main branch
+    - Cache is overwritten to `main` branch
 
 
 ## Solution
 
-This action generates cache parameters for pull request based development flow.
+This action generates effective cache config for pull request based development flow.
+Basically,
+
+- Cache always points to base branch
+- Don't export cache on pull request
+
+It would reduce time of docker build.
 
 ![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
+
 
 ### `pull_request` event
 
