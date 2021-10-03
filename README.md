@@ -32,6 +32,8 @@ For example,
 
 This action generates cache parameters for pull request based development flow.
 
+![diagram](effective-build-cache-diagram.svg)
+
 ### `pull_request` event
 
 When a pull request is opened, this action instructs docker/build-push-action to import cache of the base branch.
