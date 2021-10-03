@@ -32,7 +32,7 @@ For example,
 
 This action generates cache parameters for pull request based development flow.
 
-![diagram](effective-build-cache-diagram.svg)
+![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
 
 ### `pull_request` event
 
