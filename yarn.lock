@@ -669,10 +669,10 @@
   dependencies:
     "@octokit/openapi-types" "^10.6.4"
 
-"@octokit/webhooks-types@4.15.0":
-  version "4.15.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.15.0.tgz#1158cba6578237d60957a37963a4a05654f5668b"
-  integrity sha512-s9LgKsUzq/JH3PWDjaD/m1DIlC/QWgBWbmXVqjdxJXJQBA67KZrLWjStVlYPf0mWlVZ1MOKphDyHiOGCbs0+Kg==
+"@octokit/webhooks-types@4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.16.0.tgz#6d5dfa381ea9810830d178c88b1f8b52cd2f1f99"
+  integrity sha512-wkoAThHRfneuL8HjiRwactpqaAryRyvr8eOX20CRQKP967Xn2JoqfLaKP/BYuWV3AtbT4qVCKsjwP8LHFOrgIw==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
