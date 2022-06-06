@@ -53,7 +53,7 @@ export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   }
 }
 
-const escape = (s: string) => s.replace(/[/]/, '-')
+const escape = (s: string) => s.replaceAll(/[^\w.-]/g, '-')
 
 const inferBranch = (context: PartialContext): Cache => {
   if (context.eventName === 'pull_request') {
@@ -82,7 +82,6 @@ const inferBranch = (context: PartialContext): Cache => {
       }
     }
   }
-
 
   if (context.eventName === 'release') {
     if (context.ref.startsWith('refs/tags/')) {
