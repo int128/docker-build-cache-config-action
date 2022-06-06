@@ -9,14 +9,17 @@ export type Inputs = {
 }
 
 export type Cache = {
-  from: string
+  from: string[]
   to: string | null
 }
 
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   const b = inferBranch(context)
   return {
-    from: `${inputs.image}:${escape(`${inputs.tagPrefix}${b.from}`)}`,
+    from: [
+      ...(inputs.tagPrefix ? b.from.map((from) => `${inputs.image}:${escape(`${inputs.tagPrefix}${from}`)}`) : []),
+      ...b.from.map((from) => `${inputs.image}:${escape(from)}`),
+    ],
     to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}`)}` : null,
   }
 }
@@ -27,7 +30,7 @@ const inferBranch = (context: PartialContext): Cache => {
   if (context.eventName === 'pull_request') {
     const payload = context.payload as PullRequestEvent
     return {
-      from: payload.pull_request.base.ref,
+      from: [payload.pull_request.base.ref],
       to: null,
     }
   }
@@ -37,7 +40,7 @@ const inferBranch = (context: PartialContext): Cache => {
     if (context.ref.startsWith('refs/heads/')) {
       const branchName = trimPrefix(context.ref, 'refs/heads/')
       return {
-        from: branchName,
+        from: [branchName],
         to: branchName,
       }
     }
@@ -45,13 +48,13 @@ const inferBranch = (context: PartialContext): Cache => {
     // tag push
     const payload = context.payload as PushEvent
     return {
-      from: payload.repository.default_branch,
+      from: [payload.repository.default_branch],
       to: null,
     }
   }
 
   return {
-    from: trimPrefix(context.ref, 'refs/heads/'),
+    from: [trimPrefix(context.ref, 'refs/heads/')],
     to: null,
   }
 }

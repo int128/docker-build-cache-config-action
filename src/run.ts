@@ -11,10 +11,10 @@ type Outputs = {
 
 export const run = (inputs: Inputs): Outputs => {
   const c = cache.infer(github.context, inputs)
-  core.info(`Inferred cache: from=${c.from}, to=${c.to ?? 'null'}`)
+  core.info(`Inferred cache: from=${c.from.join(', ')}, to=${c.to ?? 'null'}`)
 
   return {
-    cacheFrom: `type=registry,ref=${c.from}`,
+    cacheFrom: '|' + c.from.map((from) => `\n  type=registry,ref=${from}`).join(),
     cacheTo: c.to !== null ? `type=registry,ref=${c.to},mode=max` : '',
   }
 }
