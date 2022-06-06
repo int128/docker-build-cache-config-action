@@ -5,26 +5,44 @@ type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
 
 export type Inputs = {
   image: string
-  tagPrefix: string
+  tagPrefix: string[]
 }
 
 export type Cache = {
   from: string[]
-  to: string | null
+  to: string[]
 }
 
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   const b = inferBranch(context)
-  const from = [
-    ...(inputs.tagPrefix ? b.from.map((from) => `${inputs.image}:${escape(`${inputs.tagPrefix}${from}`)}`) : []),
-    ...b.from.map((from) => `${inputs.image}:${escape(from)}`),
-  ]
+  const from = []
+  const to = []
+
+  for (const prefix of inputs.tagPrefix) {
+    for (const bFrom of b.from) {
+      from.push(`${inputs.image}:${escape(`${prefix}${bFrom}`)}`)
+    }
+  }
+
+  for (const bFrom of b.from) {
+    from.push(`${inputs.image}:${escape(`${bFrom}`)}`)
+  }
+
   const fromDefault = `${inputs.image}:${escape(
     (context.payload as PullRequestEvent | PushEvent).repository.default_branch
   )}`
+
+  if (!from.includes(fromDefault)) {
+    from.push(fromDefault)
+  }
+
+  for (const bTo of b.to) {
+    to.push(`${inputs.image}:${escape(`${inputs.tagPrefix[0] ?? ''}${bTo}`)}`)
+  }
+
   return {
-    from: [...from, ...(from.includes(fromDefault) ? [] : [fromDefault])],
-    to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}`)}` : null,
+    from,
+    to,
   }
 }
 
@@ -35,7 +53,7 @@ const inferBranch = (context: PartialContext): Cache => {
     const payload = context.payload as PullRequestEvent
     return {
       from: [payload.pull_request.head.ref, payload.pull_request.base.ref],
-      to: null,
+      to: [],
     }
   }
 
@@ -45,7 +63,7 @@ const inferBranch = (context: PartialContext): Cache => {
       const branchName = trimPrefix(context.ref, 'refs/heads/')
       return {
         from: [branchName],
-        to: branchName,
+        to: [branchName],
       }
     }
 
@@ -53,14 +71,14 @@ const inferBranch = (context: PartialContext): Cache => {
       // tag push
       return {
         from: [],
-        to: null,
+        to: [],
       }
     }
   }
 
   return {
     from: [trimPrefix(context.ref, 'refs/heads/')],
-    to: null,
+    to: [],
   }
 }
 

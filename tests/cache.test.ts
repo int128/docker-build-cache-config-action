@@ -51,19 +51,19 @@ const eventSchedule = {
 
 const inputs = {
   image: 'ghcr.io/int128/sandbox/cache',
-  tagPrefix: '',
+  tagPrefix: [],
 }
 
 const inputsPrefixed = {
   image: 'ghcr.io/int128/sandbox/cache',
-  tagPrefix: 'prefix-',
+  tagPrefix: ['prefix-', 'prefix-b-'],
 }
 
 test('on pull request', () => {
   const c = cache.infer(eventPullRequest, inputs)
   expect(c).toStrictEqual({
     from: ['ghcr.io/int128/sandbox/cache:feature', 'ghcr.io/int128/sandbox/cache:main'],
-    to: null,
+    to: [],
   })
 })
 
@@ -73,10 +73,12 @@ test('on pull request with prefix', () => {
     from: [
       'ghcr.io/int128/sandbox/cache:prefix-feature',
       'ghcr.io/int128/sandbox/cache:prefix-main',
+      'ghcr.io/int128/sandbox/cache:prefix-b-feature',
+      'ghcr.io/int128/sandbox/cache:prefix-b-main',
       'ghcr.io/int128/sandbox/cache:feature',
       'ghcr.io/int128/sandbox/cache:main',
     ],
-    to: null,
+    to: [],
   })
 })
 
@@ -84,7 +86,7 @@ test('on push branch', () => {
   const c = cache.infer(eventPushBranch, inputs)
   expect(c).toStrictEqual({
     from: ['ghcr.io/int128/sandbox/cache:feature', 'ghcr.io/int128/sandbox/cache:main'],
-    to: 'ghcr.io/int128/sandbox/cache:feature',
+    to: ['ghcr.io/int128/sandbox/cache:feature'],
   })
 })
 
@@ -93,10 +95,11 @@ test('on push branch with prefix', () => {
   expect(c).toStrictEqual({
     from: [
       'ghcr.io/int128/sandbox/cache:prefix-feature',
+      'ghcr.io/int128/sandbox/cache:prefix-b-feature',
       'ghcr.io/int128/sandbox/cache:feature',
       'ghcr.io/int128/sandbox/cache:main',
     ],
-    to: 'ghcr.io/int128/sandbox/cache:prefix-feature',
+    to: ['ghcr.io/int128/sandbox/cache:prefix-feature'],
   })
 })
 
@@ -104,7 +107,7 @@ test('on push tag', () => {
   const c = cache.infer(eventPushTag, inputs)
   expect(c).toStrictEqual({
     from: ['ghcr.io/int128/sandbox/cache:main'],
-    to: null,
+    to: [],
   })
 })
 
@@ -112,7 +115,7 @@ test('on push tag with prefix', () => {
   const c = cache.infer(eventPushTag, inputsPrefixed)
   expect(c).toStrictEqual({
     from: ['ghcr.io/int128/sandbox/cache:main'],
-    to: null,
+    to: [],
   })
 })
 
@@ -120,7 +123,7 @@ test('on schedule', () => {
   const c = cache.infer(eventSchedule, inputs)
   expect(c).toStrictEqual({
     from: ['ghcr.io/int128/sandbox/cache:schedule', 'ghcr.io/int128/sandbox/cache:main'],
-    to: null,
+    to: [],
   })
 })
 
@@ -129,9 +132,10 @@ test('on schedule with prefix', () => {
   expect(c).toStrictEqual({
     from: [
       'ghcr.io/int128/sandbox/cache:prefix-schedule',
+      'ghcr.io/int128/sandbox/cache:prefix-b-schedule',
       'ghcr.io/int128/sandbox/cache:schedule',
       'ghcr.io/int128/sandbox/cache:main',
     ],
-    to: null,
+    to: [],
   })
 })
