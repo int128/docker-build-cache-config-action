@@ -97,6 +97,8 @@ test('on push branch with prefix', () => {
       'ghcr.io/int128/sandbox/cache:prefix-feature',
       'ghcr.io/int128/sandbox/cache:prefix-b-feature',
       'ghcr.io/int128/sandbox/cache:feature',
+      'ghcr.io/int128/sandbox/cache:prefix-main',
+      'ghcr.io/int128/sandbox/cache:prefix-b-main',
       'ghcr.io/int128/sandbox/cache:main',
     ],
     to: ['ghcr.io/int128/sandbox/cache:prefix-feature'],
@@ -114,7 +116,11 @@ test('on push tag', () => {
 test('on push tag with prefix', () => {
   const c = cache.infer(eventPushTag, inputsPrefixed)
   expect(c).toStrictEqual({
-    from: ['ghcr.io/int128/sandbox/cache:main'],
+    from: [
+      'ghcr.io/int128/sandbox/cache:prefix-main',
+      'ghcr.io/int128/sandbox/cache:prefix-b-main',
+      'ghcr.io/int128/sandbox/cache:main',
+    ],
     to: [],
   })
 })
@@ -134,6 +140,8 @@ test('on schedule with prefix', () => {
       'ghcr.io/int128/sandbox/cache:prefix-schedule',
       'ghcr.io/int128/sandbox/cache:prefix-b-schedule',
       'ghcr.io/int128/sandbox/cache:schedule',
+      'ghcr.io/int128/sandbox/cache:prefix-main',
+      'ghcr.io/int128/sandbox/cache:prefix-b-main',
       'ghcr.io/int128/sandbox/cache:main',
     ],
     to: [],

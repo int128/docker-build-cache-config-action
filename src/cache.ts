@@ -28,6 +28,13 @@ export const infer = (context: PartialContext, inputs: Inputs): Cache => {
     from.push(`${inputs.image}:${escape(`${bFrom}`)}`)
   }
 
+  for (const prefix of inputs.tagPrefix) {
+    const fromDefaultPrefixed = `${inputs.image}:${escape(
+      `${prefix}${(context.payload as PullRequestEvent | PushEvent).repository.default_branch}`
+    )}`
+    from.push(fromDefaultPrefixed)
+  }
+
   const fromDefault = `${inputs.image}:${escape(
     (context.payload as PullRequestEvent | PushEvent).repository.default_branch
   )}`
@@ -41,7 +48,7 @@ export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   }
 
   return {
-    from,
+    from: [...new Set(from)],
     to,
   }
 }
