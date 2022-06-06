@@ -15,11 +15,15 @@ export type Cache = {
 
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   const b = inferBranch(context)
+  const from = [
+    ...(inputs.tagPrefix ? b.from.map((from) => `${inputs.image}:${escape(`${inputs.tagPrefix}${from}`)}`) : []),
+    ...b.from.map((from) => `${inputs.image}:${escape(from)}`),
+  ]
+  const fromDefault = `${inputs.image}:${escape(
+    (context.payload as PullRequestEvent | PushEvent).repository.default_branch
+  )}`
   return {
-    from: [
-      ...(inputs.tagPrefix ? b.from.map((from) => `${inputs.image}:${escape(`${inputs.tagPrefix}${from}`)}`) : []),
-      ...b.from.map((from) => `${inputs.image}:${escape(from)}`),
-    ],
+    from: [...from, ...(from.includes(fromDefault) ? [] : [fromDefault])],
     to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}`)}` : null,
   }
 }
@@ -30,14 +34,14 @@ const inferBranch = (context: PartialContext): Cache => {
   if (context.eventName === 'pull_request') {
     const payload = context.payload as PullRequestEvent
     return {
-      from: [payload.pull_request.base.ref],
+      from: [payload.pull_request.head.ref, payload.pull_request.base.ref],
       to: null,
     }
   }
 
   if (context.eventName === 'push') {
-    // branch push
     if (context.ref.startsWith('refs/heads/')) {
+      // branch push
       const branchName = trimPrefix(context.ref, 'refs/heads/')
       return {
         from: [branchName],
@@ -45,11 +49,12 @@ const inferBranch = (context: PartialContext): Cache => {
       }
     }
 
-    // tag push
-    const payload = context.payload as PushEvent
-    return {
-      from: [payload.repository.default_branch],
-      to: null,
+    if (context.ref.startsWith('refs/tags/')) {
+      // tag push
+      return {
+        from: [],
+        to: null,
+      }
     }
   }
 
