@@ -14,7 +14,7 @@ export const run = (inputs: Inputs): Outputs => {
   core.info(`Inferred cache: from=${c.from.join(', ')}, to=${c.to ?? 'null'}`)
 
   return {
-    cacheFrom: '|' + c.from.map((from) => `\n  type=registry,ref=${from}`).join(),
+    cacheFrom: c.from.map((from) => `type=registry,ref=${from}`).join('\n'),
     cacheTo: c.to !== null ? `type=registry,ref=${c.to},mode=max` : '',
   }
 }
