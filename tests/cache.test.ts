@@ -41,6 +41,14 @@ const eventPushTag = {
   },
 }
 
+const eventReleaseTag = {
+  eventName: 'release',
+  ref: 'refs/tags/v1.0.0',
+  payload: {
+    ...payloadRepository,
+  },
+}
+
 const eventSchedule = {
   eventName: 'schedule',
   ref: 'refs/heads/schedule',
@@ -115,6 +123,26 @@ test('on push tag', () => {
 
 test('on push tag with prefix', () => {
   const c = cache.infer(eventPushTag, inputsPrefixed)
+  expect(c).toStrictEqual({
+    from: [
+      'ghcr.io/int128/sandbox/cache:prefix-main',
+      'ghcr.io/int128/sandbox/cache:prefix-b-main',
+      'ghcr.io/int128/sandbox/cache:main',
+    ],
+    to: [],
+  })
+})
+
+test('on release tag', () => {
+  const c = cache.infer(eventReleaseTag, inputs)
+  expect(c).toStrictEqual({
+    from: ['ghcr.io/int128/sandbox/cache:main'],
+    to: [],
+  })
+})
+
+test('on release tag with prefix', () => {
+  const c = cache.infer(eventReleaseTag, inputsPrefixed)
   expect(c).toStrictEqual({
     from: [
       'ghcr.io/int128/sandbox/cache:prefix-main',

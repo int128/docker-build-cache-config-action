@@ -83,6 +83,17 @@ const inferBranch = (context: PartialContext): Cache => {
     }
   }
 
+
+  if (context.eventName === 'release') {
+    if (context.ref.startsWith('refs/tags/')) {
+      // tag push
+      return {
+        from: [],
+        to: [],
+      }
+    }
+  }
+
   return {
     from: [trimPrefix(context.ref, 'refs/heads/')],
     to: [],
