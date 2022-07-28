@@ -5,54 +5,97 @@ type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
 
 export type Inputs = {
   image: string
-  tagPrefix: string
+  tagPrefix: string[]
 }
 
 export type Cache = {
-  from: string
-  to: string | null
+  from: string[]
+  to: string[]
 }
 
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   const b = inferBranch(context)
+  const from = []
+  const to = []
+
+  for (const prefix of inputs.tagPrefix) {
+    for (const bFrom of b.from) {
+      from.push(`${inputs.image}:${escape(`${prefix}${bFrom}`)}`)
+    }
+  }
+
+  for (const bFrom of b.from) {
+    from.push(`${inputs.image}:${escape(`${bFrom}`)}`)
+  }
+
+  for (const prefix of inputs.tagPrefix) {
+    const fromDefaultPrefixed = `${inputs.image}:${escape(
+      `${prefix}${(context.payload as PullRequestEvent | PushEvent).repository.default_branch}`
+    )}`
+    from.push(fromDefaultPrefixed)
+  }
+
+  const fromDefault = `${inputs.image}:${escape(
+    (context.payload as PullRequestEvent | PushEvent).repository.default_branch
+  )}`
+
+  if (!from.includes(fromDefault)) {
+    from.push(fromDefault)
+  }
+
+  for (const bTo of b.to) {
+    to.push(`${inputs.image}:${escape(`${inputs.tagPrefix[0] ?? ''}${bTo}`)}`)
+  }
+
   return {
-    from: `${inputs.image}:${escape(`${inputs.tagPrefix}${b.from}`)}`,
-    to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}`)}` : null,
+    from: [...new Set(from)],
+    to,
   }
 }
 
-const escape = (s: string) => s.replace(/[/]/, '-')
+const escape = (s: string) => s.replaceAll(/[^\w.-]/g, '-')
 
 const inferBranch = (context: PartialContext): Cache => {
   if (context.eventName === 'pull_request') {
     const payload = context.payload as PullRequestEvent
     return {
-      from: payload.pull_request.base.ref,
-      to: null,
+      from: [payload.pull_request.head.ref, payload.pull_request.base.ref],
+      to: [],
     }
   }
 
   if (context.eventName === 'push') {
-    // branch push
     if (context.ref.startsWith('refs/heads/')) {
+      // branch push
       const branchName = trimPrefix(context.ref, 'refs/heads/')
       return {
-        from: branchName,
-        to: branchName,
+        from: [branchName],
+        to: [branchName],
       }
     }
 
-    // tag push
-    const payload = context.payload as PushEvent
-    return {
-      from: payload.repository.default_branch,
-      to: null,
+    if (context.ref.startsWith('refs/tags/')) {
+      // tag push
+      return {
+        from: [],
+        to: [],
+      }
+    }
+  }
+
+  if (context.eventName === 'release') {
+    if (context.ref.startsWith('refs/tags/')) {
+      // tag push
+      return {
+        from: [],
+        to: [],
+      }
     }
   }
 
   return {
-    from: trimPrefix(context.ref, 'refs/heads/'),
-    to: null,
+    from: [trimPrefix(context.ref, 'refs/heads/')],
+    to: [],
   }
 }
 

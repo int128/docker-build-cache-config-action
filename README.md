@@ -43,23 +43,29 @@ It would reduce time of docker build.
 
 ### `pull_request` event
 
-When a pull request is opened, this action instructs docker/build-push-action to import cache of the base branch.
+When a pull request is opened, this action instructs docker/build-push-action to import cache of the pull request branch with a fallback to the base branch and the default branch.
 It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: |
+  type=registry,ref=IMAGE:head
+  type=registry,ref=IMAGE:base
+  type=registry,ref=IMAGE:main
 cache-to:
 ```
 
 ### `push` event of branch
 
-When a branch is pushed, this action instructs docker/build-push-action to import and export cache of the branch.
+When a branch is pushed, this action instructs docker/build-push-action to import and export cache of the branch with a fallback to the default branch.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
-cache-to: type=registry,ref=IMAGE:main,mode=max
+cache-from: |
+  type=registry,ref=IMAGE:head
+  type=registry,ref=IMAGE:main
+cache-to: |
+  type=registry,ref=IMAGE:main,mode=max
 ```
 
 ### `push` event of tag
@@ -69,18 +75,21 @@ It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: |
+  type=registry,ref=IMAGE:main
 cache-to:
 ```
 
 ### Others
 
-Otherwise, this action instructs docker/build-push-action to import cache of the triggered branch.
+Otherwise, this action instructs docker/build-push-action to import cache of the triggered branch with a fallback to the default branch.
 It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: |
+  type=registry,ref=IMAGE:head
+  type=registry,ref=IMAGE:main
 cache-to:
 ```
 
@@ -121,7 +130,8 @@ You can set a tag prefix to isolate caches.
         id: cache
         with:
           image: ghcr.io/${{ github.repository }}/cache
-          tag-prefix: microservice-name--
+          tag-prefix: |
+            microservice-name--
       - uses: docker/build-push-action@v2
         id: build
         with:
@@ -138,7 +148,7 @@ You can set a tag prefix to isolate caches.
 | Name | Default | Description
 |------|----------|------------
 | `image` | (required) | Image name to import/export cache
-| `tag-prefix` | ` ` | Prefix of tag
+| `tag-prefix` | `[]` | An array of tag prefixes
 
 
 ## Outputs
