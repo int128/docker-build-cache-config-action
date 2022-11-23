@@ -5,6 +5,7 @@ const main = (): void => {
   const outputs = run({
     image: core.getInput('image', { required: true }),
     tagPrefix: core.getInput('tag-prefix'),
+    tagSuffix: core.getInput('tag-suffix'),
   })
   core.setOutput('cache-from', outputs.cacheFrom)
   core.setOutput('cache-to', outputs.cacheTo)

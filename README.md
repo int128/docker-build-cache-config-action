@@ -108,6 +108,41 @@ Here is an example to use cache on GHCR (GitHub Container Registry).
           cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
+### For multi-architecture image
+
+You can set a tag suffix to isolate caches.
+
+```yaml
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+    steps:
+      - uses: docker/metadata-action@v3
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: suffix=-${{ matrix.platform }}
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ghcr.io/${{ github.repository }}/cache
+          tag-suffix: -${{ matrix.platform }}
+      - uses: docker/build-push-action@v2
+        id: build
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
+          platforms: ${{ matrix.platform }}
+```
+
 ### For monorepo
 
 You can set a tag prefix to isolate caches.
@@ -133,15 +168,17 @@ You can set a tag prefix to isolate caches.
 ```
 
 
-## Inputs
+## Specification
+
+### Inputs
 
 | Name | Default | Description
 |------|----------|------------
 | `image` | (required) | Image name to import/export cache
 | `tag-prefix` | ` ` | Prefix of tag
+| `tag-suffix` | ` ` | Suffix of tag
 
-
-## Outputs
+### Outputs
 
 | Name | Description
 |------|------------

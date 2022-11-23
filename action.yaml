@@ -8,6 +8,9 @@ inputs:
   tag-prefix:
     description: prefix of image tag
     required: false
+  tag-suffix:
+    description: suffix of image tag
+    required: false
 
 outputs:
   cache-from:
