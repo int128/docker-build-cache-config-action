@@ -139,6 +139,7 @@ You can set a tag prefix to isolate caches.
 |------|----------|------------
 | `image` | (required) | Image name to import/export cache
 | `tag-prefix` | ` ` | Prefix of tag
+| `tag-suffix` | ` ` | Suffix of tag
 
 
 ## Outputs

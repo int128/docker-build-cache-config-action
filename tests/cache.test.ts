@@ -17,6 +17,7 @@ test('on pull request', () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       tagPrefix: '',
+      tagSuffix: '',
     }
   )
   expect(c).toStrictEqual({
@@ -35,6 +36,7 @@ test('on push branch', () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       tagPrefix: '',
+      tagSuffix: '',
     }
   )
   expect(c).toStrictEqual({
@@ -59,6 +61,7 @@ test('on push tag', () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       tagPrefix: '',
+      tagSuffix: '',
     }
   )
   expect(c).toStrictEqual({
@@ -77,6 +80,7 @@ test('on schedule', () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       tagPrefix: '',
+      tagSuffix: '',
     }
   )
   expect(c).toStrictEqual({

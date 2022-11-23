@@ -6,6 +6,7 @@ type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
 export type Inputs = {
   image: string
   tagPrefix: string
+  tagSuffix: string
 }
 
 export type Cache = {
@@ -16,8 +17,8 @@ export type Cache = {
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   const b = inferBranch(context)
   return {
-    from: `${inputs.image}:${escape(`${inputs.tagPrefix}${b.from}`)}`,
-    to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}`)}` : null,
+    from: `${inputs.image}:${escape(`${inputs.tagPrefix}${b.from}${inputs.tagSuffix}`)}`,
+    to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}${inputs.tagSuffix}`)}` : null,
   }
 }
 
