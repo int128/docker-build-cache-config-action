@@ -4,6 +4,7 @@ import { run } from './run'
 const main = (): void => {
   const outputs = run({
     image: core.getInput('image', { required: true }),
+    flavor: core.getMultilineInput('flavor'),
     tagPrefix: core.getInput('tag-prefix'),
     tagSuffix: core.getInput('tag-suffix'),
   })

@@ -131,7 +131,7 @@ jobs:
         id: cache
         with:
           image: ghcr.io/${{ github.repository }}/cache
-          tag-suffix: -${{ matrix.platform }}
+          flavor: suffix=-${{ matrix.platform }}
       - uses: docker/build-push-action@v2
         id: build
         with:
@@ -156,7 +156,7 @@ You can set a tag prefix to isolate caches.
         id: cache
         with:
           image: ghcr.io/${{ github.repository }}/cache
-          tag-prefix: microservice-name--
+          flavor: prefix=microservice-name--
       - uses: docker/build-push-action@v2
         id: build
         with:
@@ -175,8 +175,12 @@ You can set a tag prefix to isolate caches.
 | Name | Default | Description
 |------|----------|------------
 | `image` | (required) | Image name to import/export cache
-| `tag-prefix` | ` ` | Prefix of tag
-| `tag-suffix` | ` ` | Suffix of tag
+| `flavor` | ` ` | Flavor in form of `prefix=,suffix=`
+| `tag-prefix` | ` ` | Prefix of tag (deprecated)
+| `tag-suffix` | ` ` | Suffix of tag (deprecated)
+
+`flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
+except this action supports only `prefix` and `suffix`.
 
 ### Outputs
 

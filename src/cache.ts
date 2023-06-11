@@ -5,6 +5,7 @@ type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
 
 export type Inputs = {
   image: string
+  flavor: string[]
   tagPrefix: string
   tagSuffix: string
 }
@@ -15,14 +16,36 @@ export type Cache = {
 }
 
 export const infer = (context: PartialContext, inputs: Inputs): Cache => {
+  let { prefix, suffix } = parseFlavor(inputs.flavor)
+  if (inputs.tagPrefix) {
+    prefix = inputs.tagPrefix
+  }
+  if (inputs.tagSuffix) {
+    suffix = inputs.tagSuffix
+  }
   const b = inferBranch(context)
   return {
-    from: `${inputs.image}:${escape(`${inputs.tagPrefix}${b.from}${inputs.tagSuffix}`)}`,
-    to: b.to !== null ? `${inputs.image}:${escape(`${inputs.tagPrefix}${b.to}${inputs.tagSuffix}`)}` : null,
+    from: `${inputs.image}:${escape(`${prefix}${b.from}${suffix}`)}`,
+    to: b.to !== null ? `${inputs.image}:${escape(`${prefix}${b.to}${suffix}`)}` : null,
   }
 }
 
 const escape = (s: string) => s.replace(/[/]/, '-')
+
+const parseFlavor = (flavor: string[]) => {
+  let prefix = ''
+  let suffix = ''
+  for (const kv of flavor.flatMap((s) => s.split(/,/))) {
+    const [k, v] = kv.trim().split(/=/, 2)
+    if (k === 'prefix') {
+      prefix = v
+    }
+    if (k === 'suffix') {
+      suffix = v
+    }
+  }
+  return { prefix, suffix }
+}
 
 const inferBranch = (context: PartialContext): Cache => {
   if (context.eventName === 'pull_request') {

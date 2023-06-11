@@ -16,6 +16,7 @@ test('on pull request', () => {
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
       tagPrefix: '',
       tagSuffix: '',
     }
@@ -35,6 +36,7 @@ test('on push branch', () => {
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
       tagPrefix: '',
       tagSuffix: '',
     }
@@ -45,18 +47,27 @@ test('on push branch', () => {
   })
 })
 
-test('on push branch with prefix', () => {
+test.each([
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: [],
+    tagPrefix: 'frontend--',
+    tagSuffix: '',
+  },
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: ['prefix=frontend--'],
+    tagPrefix: '',
+    tagSuffix: '',
+  },
+])('on push branch with prefix %p', (inputs) => {
   const c = cache.infer(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
     },
-    {
-      image: 'ghcr.io/int128/sandbox/cache',
-      tagPrefix: 'frontend--',
-      tagSuffix: '',
-    }
+    inputs
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:frontend--main',
@@ -64,18 +75,27 @@ test('on push branch with prefix', () => {
   })
 })
 
-test('on push branch with suffix', () => {
+test.each([
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: [],
+    tagPrefix: '',
+    tagSuffix: '-arm64',
+  },
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: ['suffix=-arm64'],
+    tagPrefix: '',
+    tagSuffix: '',
+  },
+])('on push branch with suffix %p', (inputs) => {
   const c = cache.infer(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
     },
-    {
-      image: 'ghcr.io/int128/sandbox/cache',
-      tagPrefix: '',
-      tagSuffix: '-arm64',
-    }
+    inputs
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main-arm64',
@@ -83,18 +103,33 @@ test('on push branch with suffix', () => {
   })
 })
 
-test('on push branch with prefix and suffix', () => {
+test.each([
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: [],
+    tagPrefix: 'frontend--',
+    tagSuffix: '-arm64',
+  },
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: ['prefix=frontend--,suffix=-arm64'],
+    tagPrefix: '',
+    tagSuffix: '',
+  },
+  {
+    image: 'ghcr.io/int128/sandbox/cache',
+    flavor: ['prefix=frontend--', 'suffix=-arm64'],
+    tagPrefix: '',
+    tagSuffix: '',
+  },
+])('on push branch with prefix and suffix %p', (inputs) => {
   const c = cache.infer(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
     },
-    {
-      image: 'ghcr.io/int128/sandbox/cache',
-      tagPrefix: 'frontend--',
-      tagSuffix: '-arm64',
-    }
+    inputs
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:frontend--main-arm64',
@@ -117,6 +152,7 @@ test('on push tag', () => {
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
       tagPrefix: '',
       tagSuffix: '',
     }
@@ -136,6 +172,7 @@ test('on schedule', () => {
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
       tagPrefix: '',
       tagSuffix: '',
     }
