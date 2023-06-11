@@ -5,12 +5,19 @@ inputs:
   image:
     description: image name to import/export cache
     required: true
+  flavor:
+    description: flavor
+    required: false
   tag-prefix:
     description: prefix of image tag
     required: false
+    deprecationMessage: |
+      use `flavor: prefix=`
   tag-suffix:
     description: suffix of image tag
     required: false
+    deprecationMessage: |
+      use `flavor: suffix=`
 
 outputs:
   cache-from:
