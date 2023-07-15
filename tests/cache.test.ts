@@ -19,7 +19,7 @@ test('on pull request', () => {
       flavor: [],
       tagPrefix: '',
       tagSuffix: '',
-    }
+    },
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main',
@@ -39,7 +39,7 @@ test('on push branch', () => {
       flavor: [],
       tagPrefix: '',
       tagSuffix: '',
-    }
+    },
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main',
@@ -67,7 +67,7 @@ test.each([
       ref: 'refs/heads/main',
       payload: {},
     },
-    inputs
+    inputs,
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:frontend--main',
@@ -95,7 +95,7 @@ test.each([
       ref: 'refs/heads/main',
       payload: {},
     },
-    inputs
+    inputs,
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main-arm64',
@@ -129,7 +129,7 @@ test.each([
       ref: 'refs/heads/main',
       payload: {},
     },
-    inputs
+    inputs,
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:frontend--main-arm64',
@@ -155,7 +155,7 @@ test('on push tag', () => {
       flavor: [],
       tagPrefix: '',
       tagSuffix: '',
-    }
+    },
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main',
@@ -175,7 +175,7 @@ test('on schedule', () => {
       flavor: [],
       tagPrefix: '',
       tagSuffix: '',
-    }
+    },
   )
   expect(c).toStrictEqual({
     from: 'ghcr.io/int128/sandbox/cache:main',
