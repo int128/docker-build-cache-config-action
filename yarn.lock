@@ -1005,10 +1005,10 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@octokit/webhooks-types@7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-7.2.0.tgz#b5d5348a58596d36cb445e7fe119db01cdd4169e"
-  integrity sha512-TX6347q0TJbKZD5M1wiMFUrq8T/GP6PkcnssLfw/fZ+//jkW8uRvOl63bNlhPGt82sml9Dy5nSPP0GIHW9XBTQ==
+"@octokit/webhooks-types@7.3.0":
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-7.3.0.tgz#21742783849d18658e9d1a7d79d2f035cab576a6"
+  integrity sha512-DnZ0JdT6+me5a74H/FxHz6Pu3udTtGj5qfno9GhHWgdJoqo1EvaBWqnXRN2//XarzgfbsgkBO9Kzv7ap99mNuQ==
 
 "@sinclair/typebox@^0.24.1":
   version "0.24.19"
