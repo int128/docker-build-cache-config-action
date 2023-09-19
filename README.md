@@ -41,7 +41,7 @@ It would reduce time of docker build.
 ![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
 
 
-### `pull_request` event
+### `pull_request` event (and `pull_request` comment)
 
 When a pull request is opened, this action instructs docker/build-push-action to import cache of the base branch.
 It does not export cache to prevent cache pollution.

@@ -1,5 +1,6 @@
+import { getOctokit } from '@actions/github'
 import { Context } from '@actions/github/lib/context'
-import { PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
+import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
 
 type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
 
@@ -8,6 +9,7 @@ export type Inputs = {
   flavor: string[]
   tagPrefix: string
   tagSuffix: string
+  token: string
 }
 
 export type Cache = {
@@ -15,7 +17,7 @@ export type Cache = {
   to: string | null
 }
 
-export const infer = (context: PartialContext, inputs: Inputs): Cache => {
+export const infer = async (context: PartialContext, inputs: Inputs): Promise<Cache> => {
   let { prefix, suffix } = parseFlavor(inputs.flavor)
   if (inputs.tagPrefix) {
     prefix = inputs.tagPrefix
@@ -23,7 +25,7 @@ export const infer = (context: PartialContext, inputs: Inputs): Cache => {
   if (inputs.tagSuffix) {
     suffix = inputs.tagSuffix
   }
-  const b = inferBranch(context)
+  const b = await inferBranch(context, inputs)
   return {
     from: `${inputs.image}:${escape(`${prefix}${b.from}${suffix}`)}`,
     to: b.to !== null ? `${inputs.image}:${escape(`${prefix}${b.to}${suffix}`)}` : null,
@@ -47,7 +49,20 @@ const parseFlavor = (flavor: string[]) => {
   return { prefix, suffix }
 }
 
-const inferBranch = (context: PartialContext): Cache => {
+const inferBranch = async (context: PartialContext, inputs: Inputs): Promise<Cache> => {
+  if (context.eventName === 'issue_comment') {
+    const payload = context.payload as IssueCommentEvent
+    if (payload.issue.pull_request?.url) {
+      const octokit = getOctokit(inputs.token)
+
+      const pullRequest = await octokit.request(`GET ${payload.issue.pull_request.url}`)
+      return {
+        from: pullRequest.data.base.ref,
+        to: null,
+      }
+    }
+  }
+
   if (context.eventName === 'pull_request') {
     const payload = context.payload as PullRequestEvent
     return {
