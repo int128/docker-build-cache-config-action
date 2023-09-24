@@ -2,7 +2,7 @@ import { getOctokit } from '@actions/github'
 import { Context } from '@actions/github/lib/context'
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
 
-type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload'>
+type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload' | 'repo' | 'issue'>
 
 export type Inputs = {
   image: string
@@ -54,8 +54,11 @@ const inferBranch = async (context: PartialContext, inputs: Inputs): Promise<Cac
     const payload = context.payload as IssueCommentEvent
     if (payload.issue.pull_request?.url) {
       const octokit = getOctokit(inputs.token)
-
-      const pullRequest = await octokit.request(`GET ${payload.issue.pull_request.url}`)
+      const pullRequest = await octokit.rest.pulls.get({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: context.issue.number,
+      })
       return {
         from: pullRequest.data.base.ref,
         to: null,

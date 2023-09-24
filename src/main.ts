@@ -13,4 +13,7 @@ const main = async (): Promise<void> => {
   core.setOutput('cache-to', outputs.cacheTo)
 }
 
-main()
+main().catch((e: Error) => {
+  core.setFailed(e)
+  console.error(e)
+})

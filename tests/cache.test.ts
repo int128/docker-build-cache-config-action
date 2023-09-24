@@ -13,6 +13,8 @@ test('on pull request', async () => {
           },
         },
       },
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
@@ -34,6 +36,8 @@ test('on push branch', async () => {
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
@@ -70,6 +74,8 @@ test.each([
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     inputs,
   )
@@ -100,6 +106,8 @@ test.each([
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     inputs,
   )
@@ -137,6 +145,8 @@ test.each([
       eventName: 'push',
       ref: 'refs/heads/main',
       payload: {},
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     inputs,
   )
@@ -158,6 +168,8 @@ test('on push tag', async () => {
           default_branch: 'main',
         },
       },
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
@@ -179,6 +191,8 @@ test('on schedule', async () => {
       eventName: 'schedule',
       ref: 'refs/heads/main',
       payload: {},
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
     {
       image: 'ghcr.io/int128/sandbox/cache',
