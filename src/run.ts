@@ -9,8 +9,8 @@ type Outputs = {
   cacheTo: string
 }
 
-export const run = (inputs: Inputs): Outputs => {
-  const c = cache.infer(github.context, inputs)
+export const run = async (inputs: Inputs): Promise<Outputs> => {
+  const c = await cache.infer(github.context, inputs)
   core.info(`Inferred cache: from=${c.from}, to=${c.to ?? 'null'}`)
 
   return {

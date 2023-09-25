@@ -18,6 +18,10 @@ inputs:
     required: false
     deprecationMessage: |
       use `flavor: suffix=`
+  token:
+    description: token to access github api
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   cache-from:
