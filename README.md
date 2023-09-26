@@ -163,19 +163,55 @@ You can set a tag prefix to isolate caches.
     cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
+### For Amazon ECR
+
+Amazon ECR now supports the cache manifest ([aws/containers-roadmap#876](https://github.com/aws/containers-roadmap/issues/876)).
+This action supports the extra attribute `image-manifest=true` by `extra-cache-to` input.
+
+Here is an example to use the cache in an Amazon ECR repository.
+
+```yaml
+- uses: aws-actions/configure-aws-credentials@v2
+  with:
+    role-to-assume: arn:aws:iam::ACCOUNT:role/ROLE
+- uses: aws-actions/amazon-ecr-login@v1
+  id: ecr
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}/cache
+    extra-cache-to: image-manifest=true
+- uses: docker/build-push-action@v3
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
 ## Specification
 
 ### Inputs
 
-| Name         | Default    | Description                         |
-| ------------ | ---------- | ----------------------------------- |
-| `image`      | (required) | Image name to import/export cache   |
-| `flavor`     | ` `        | Flavor in form of `prefix=,suffix=` |
-| `tag-prefix` | ` `        | Prefix of tag (deprecated)          |
-| `tag-suffix` | ` `        | Suffix of tag (deprecated)          |
+| Name               | Default    | Description                         |
+| ------------------ | ---------- | ----------------------------------- |
+| `image`            | (required) | Image name to import/export cache   |
+| `flavor`           | ` `        | Flavor in form of `prefix=,suffix=` |
+| `tag-prefix`       | ` `        | Prefix of tag (deprecated)          |
+| `tag-suffix`       | ` `        | Suffix of tag (deprecated)          |
+| `extra-cache-from` | ` `        | Extra flag to `cache-from`          |
+| `extra-cache-to`   | ` `        | Extra flag to `cache-to`            |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
+
+`extra-cache-to` is added to `cache-to` parameter only when it needs to export cache.
 
 ### Outputs
 

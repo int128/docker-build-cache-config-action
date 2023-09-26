@@ -7,6 +7,8 @@ const main = async (): Promise<void> => {
     flavor: core.getMultilineInput('flavor'),
     tagPrefix: core.getInput('tag-prefix'),
     tagSuffix: core.getInput('tag-suffix'),
+    extraCacheFrom: core.getInput('extra-cache-from'),
+    extraCacheTo: core.getInput('extra-cache-to'),
     token: core.getInput('token', { required: true }),
   })
   core.setOutput('cache-from', outputs.cacheFrom)

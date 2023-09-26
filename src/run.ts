@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { inferImageTags } from './infer'
+import { generateDockerFlags } from './docker'
 
 type Inputs = {
   image: string
@@ -8,6 +9,8 @@ type Inputs = {
   tagPrefix: string
   tagSuffix: string
   token: string
+  extraCacheFrom: string
+  extraCacheTo: string
 }
 
 type Outputs = {
@@ -19,9 +22,10 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
   const c = await inferImageTags(github.context, inputs)
   core.info(`Inferred image tag of from: ${c.from}`)
   core.info(`Inferred image tag of to: ${c.to}`)
-
-  return {
-    cacheFrom: `type=registry,ref=${c.from}`,
-    cacheTo: c.to !== null ? `type=registry,ref=${c.to},mode=max` : '',
-  }
+  return generateDockerFlags({
+    cacheFromImageTag: c.from,
+    cacheToImageTag: c.to,
+    extraCacheFrom: inputs.extraCacheFrom,
+    extraCacheTo: inputs.extraCacheTo,
+  })
 }
