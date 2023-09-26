@@ -2,7 +2,6 @@
 
 This is an action to generate `cache-from` and `cache-to` inputs of [docker/build-push-action](https://github.com/docker/build-push-action) for effective cache in pull request based development flow.
 
-
 ## Problem to solve
 
 Docker BuildKit supports cache.
@@ -18,15 +17,14 @@ For example,
 
 1. Initially cache is set to `main` branch
 1. When pull request B is opened,
-    - Cache hit
-    - Cache is overwritten to B
+   - Cache hit
+   - Cache is overwritten to B
 1. When pull request C is opened,
-    - Cache miss
-    - Cache is overwritten to C
+   - Cache miss
+   - Cache is overwritten to C
 1. When pull request B is merged into main,
-    - Cache miss
-    - Cache is overwritten to `main` branch
-
+   - Cache miss
+   - Cache is overwritten to `main` branch
 
 ## Solution
 
@@ -39,7 +37,6 @@ Basically,
 It would reduce time of docker build.
 
 ![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
-
 
 ### `pull_request` event (and `pull_request` comment)
 
@@ -84,28 +81,27 @@ cache-from: type=registry,ref=IMAGE:main
 cache-to:
 ```
 
-
 ## Example
 
 Here is an example to use cache on GHCR (GitHub Container Registry).
 
 ```yaml
-      - uses: docker/metadata-action@v3
-        id: metadata
-        with:
-          images: ghcr.io/${{ github.repository }}
-      - uses: int128/docker-build-cache-config-action@v1
-        id: cache
-        with:
-          image: ghcr.io/${{ github.repository }}/cache
-      - uses: docker/build-push-action@v2
-        id: build
-        with:
-          push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: ${{ steps.cache.outputs.cache-from }}
-          cache-to: ${{ steps.cache.outputs.cache-to }}
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+- uses: docker/build-push-action@v2
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
 ### For multi-architecture image
@@ -148,43 +144,42 @@ jobs:
 You can set a tag prefix to isolate caches.
 
 ```yaml
-      - uses: docker/metadata-action@v3
-        id: metadata
-        with:
-          images: ghcr.io/${{ github.repository }}/microservice-name
-      - uses: int128/docker-build-cache-config-action@v1
-        id: cache
-        with:
-          image: ghcr.io/${{ github.repository }}/cache
-          flavor: prefix=microservice-name--
-      - uses: docker/build-push-action@v2
-        id: build
-        with:
-          push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: ${{ steps.cache.outputs.cache-from }}
-          cache-to: ${{ steps.cache.outputs.cache-to }}
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}/microservice-name
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+    flavor: prefix=microservice-name--
+- uses: docker/build-push-action@v2
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
-
 
 ## Specification
 
 ### Inputs
 
-| Name | Default | Description
-|------|----------|------------
-| `image` | (required) | Image name to import/export cache
-| `flavor` | ` ` | Flavor in form of `prefix=,suffix=`
-| `tag-prefix` | ` ` | Prefix of tag (deprecated)
-| `tag-suffix` | ` ` | Suffix of tag (deprecated)
+| Name         | Default    | Description                         |
+| ------------ | ---------- | ----------------------------------- |
+| `image`      | (required) | Image name to import/export cache   |
+| `flavor`     | ` `        | Flavor in form of `prefix=,suffix=` |
+| `tag-prefix` | ` `        | Prefix of tag (deprecated)          |
+| `tag-suffix` | ` `        | Suffix of tag (deprecated)          |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
 
 ### Outputs
 
-| Name | Description
-|------|------------
-| `cache-from` | Parameter for docker/build-push-action
-| `cache-to` | Parameter for docker/build-push-action
+| Name         | Description                            |
+| ------------ | -------------------------------------- |
+| `cache-from` | Parameter for docker/build-push-action |
+| `cache-to`   | Parameter for docker/build-push-action |
