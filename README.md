@@ -171,28 +171,37 @@ This action supports the extra attribute `image-manifest=true` by `extra-cache-t
 Here is an example to use the cache in an Amazon ECR repository.
 
 ```yaml
-- uses: aws-actions/configure-aws-credentials@v2
-  with:
-    role-to-assume: arn:aws:iam::ACCOUNT:role/ROLE
-- uses: aws-actions/amazon-ecr-login@v1
-  id: ecr
-- uses: docker/metadata-action@v3
-  id: metadata
-  with:
-    images: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
-- uses: int128/docker-build-cache-config-action@v1
-  id: cache
-  with:
-    image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}/cache
-    extra-cache-to: image-manifest=true
-- uses: docker/build-push-action@v3
-  id: build
-  with:
-    push: true
-    tags: ${{ steps.metadata.outputs.tags }}
-    labels: ${{ steps.metadata.outputs.labels }}
-    cache-from: ${{ steps.cache.outputs.cache-from }}
-    cache-to: ${{ steps.cache.outputs.cache-to }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image-uri: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}@${{ steps.build.outputs.digest }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::ACCOUNT:role/ROLE
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: ecr
+      - uses: docker/metadata-action@v5
+        id: metadata
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}/cache
+          extra-cache-to: image-manifest=true
+      - uses: docker/build-push-action@v5
+        id: build
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
 ## Specification
