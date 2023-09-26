@@ -17,8 +17,8 @@ type Outputs = {
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
   const c = await inferImageTags(github.context, inputs)
-  core.info(`Inferred from tag: ${c.from}`)
-  core.info(`Inferred to tag: ${c.to}`)
+  core.info(`Inferred image tag of from: ${c.from}`)
+  core.info(`Inferred image tag of to: ${c.to}`)
 
   return {
     cacheFrom: `type=registry,ref=${c.from}`,
