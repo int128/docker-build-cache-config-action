@@ -11,6 +11,7 @@ const main = async (): Promise<void> => {
     extraCacheTo: core.getInput('extra-cache-to'),
     token: core.getInput('token', { required: true }),
   })
+  core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
   core.setOutput('cache-from', outputs.cacheFrom)
   core.setOutput('cache-to', outputs.cacheTo)
 }
