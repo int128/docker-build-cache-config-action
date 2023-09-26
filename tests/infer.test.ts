@@ -1,4 +1,4 @@
-import * as cache from '../src/cache'
+import { inferImageTags } from '../src/infer'
 
 const octokitMock = {
   rest: {
@@ -10,7 +10,7 @@ const octokitMock = {
 jest.mock('@actions/github', () => ({ getOctokit: () => octokitMock }))
 
 test('on pull request', async () => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'pull_request',
       ref: 'refs/pulls/123/merge',
@@ -47,7 +47,7 @@ test('on pull request comment', async () => {
       },
     },
   })
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'issue_comment',
       ref: 'refs/pulls/123/merge',
@@ -83,7 +83,7 @@ test('on pull request comment', async () => {
 })
 
 test('on push branch', async () => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
@@ -121,7 +121,7 @@ test.each([
     token: '',
   },
 ])('on push branch with prefix %p', async (inputs) => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
@@ -153,7 +153,7 @@ test.each([
     token: '',
   },
 ])('on push branch with suffix %p', async (inputs) => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
@@ -192,7 +192,7 @@ test.each([
     token: '',
   },
 ])('on push branch with prefix and suffix %p', async (inputs) => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'push',
       ref: 'refs/heads/main',
@@ -209,7 +209,7 @@ test.each([
 })
 
 test('on push tag', async () => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'push',
       ref: 'refs/tags/v1.0.0',
@@ -238,7 +238,7 @@ test('on push tag', async () => {
 })
 
 test('on schedule', async () => {
-  const c = await cache.infer(
+  const c = await inferImageTags(
     {
       eventName: 'schedule',
       ref: 'refs/heads/main',

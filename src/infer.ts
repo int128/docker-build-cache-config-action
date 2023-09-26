@@ -4,7 +4,7 @@ import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhook
 
 type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload' | 'repo' | 'issue'>
 
-export type Inputs = {
+type Inputs = {
   image: string
   flavor: string[]
   tagPrefix: string
@@ -12,12 +12,12 @@ export type Inputs = {
   token: string
 }
 
-export type Cache = {
+type Cache = {
   from: string
   to: string | null
 }
 
-export const infer = async (context: PartialContext, inputs: Inputs): Promise<Cache> => {
+export const inferImageTags = async (context: PartialContext, inputs: Inputs): Promise<Cache> => {
   let { prefix, suffix } = parseFlavor(inputs.flavor)
   if (inputs.tagPrefix) {
     prefix = inputs.tagPrefix

@@ -1,8 +1,14 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import * as cache from './cache'
+import { inferImageTags } from './infer'
 
-export type Inputs = cache.Inputs
+type Inputs = {
+  image: string
+  flavor: string[]
+  tagPrefix: string
+  tagSuffix: string
+  token: string
+}
 
 type Outputs = {
   cacheFrom: string
@@ -10,8 +16,9 @@ type Outputs = {
 }
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
-  const c = await cache.infer(github.context, inputs)
-  core.info(`Inferred cache: from=${c.from}, to=${c.to ?? 'null'}`)
+  const c = await inferImageTags(github.context, inputs)
+  core.info(`Inferred from tag: ${c.from}`)
+  core.info(`Inferred to tag: ${c.to}`)
 
   return {
     cacheFrom: `type=registry,ref=${c.from}`,
