@@ -9,7 +9,36 @@ const octokitMock = {
 }
 jest.mock('@actions/github', () => ({ getOctokit: () => octokitMock }))
 
-test('on pull request', async () => {
+test.each([
+  {
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      tagPrefix: '',
+      tagSuffix: '',
+      token: '',
+      pullRequestCache: false,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:main'],
+      to: [],
+    },
+  },
+  {
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      tagPrefix: '',
+      tagSuffix: '',
+      token: '',
+      pullRequestCache: true,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:pr-123', 'ghcr.io/int128/sandbox/cache:main'],
+      to: ['ghcr.io/int128/sandbox/cache:pr-123'],
+    },
+  },
+])('on pull request %p', async ({ inputs, expected }) => {
   const c = await inferImageTags(
     {
       eventName: 'pull_request',
@@ -25,26 +54,47 @@ test('on pull request', async () => {
       repo: { owner: 'int128', repo: 'sandbox' },
       issue: { owner: 'int128', repo: 'sandbox', number: 0 },
     },
-    {
+    inputs,
+  )
+  expect(c).toStrictEqual(expected)
+})
+
+test.each([
+  {
+    inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       tagPrefix: '',
       tagSuffix: '',
       token: '',
+      pullRequestCache: false,
     },
-  )
-  expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main',
-    to: null,
-  })
-})
-
-test('on pull request comment', async () => {
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:main'],
+      to: [],
+    },
+  },
+  {
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      tagPrefix: '',
+      tagSuffix: '',
+      token: '',
+      pullRequestCache: true,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:pr-123', 'ghcr.io/int128/sandbox/cache:main'],
+      to: ['ghcr.io/int128/sandbox/cache:pr-123'],
+    },
+  },
+])('on pull request comment %p', async ({ inputs, expected }) => {
   octokitMock.rest.pulls.get.mockResolvedValueOnce({
     data: {
       base: {
         ref: 'main',
       },
+      number: 123,
     },
   })
   const c = await inferImageTags(
@@ -62,13 +112,7 @@ test('on pull request comment', async () => {
       repo: { owner: 'int128', repo: 'sandbox' },
       issue: { owner: 'int128', repo: 'sandbox', number: 123 },
     },
-    {
-      image: 'ghcr.io/int128/sandbox/cache',
-      flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
-      token: '',
-    },
+    inputs,
   )
   expect(octokitMock.rest.pulls.get).toHaveBeenCalledTimes(1)
   expect(octokitMock.rest.pulls.get).toHaveBeenCalledWith({
@@ -76,10 +120,7 @@ test('on pull request comment', async () => {
     repo: 'sandbox',
     pull_number: 123,
   })
-  expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main',
-    to: null,
-  })
+  expect(c).toStrictEqual(expected)
 })
 
 test('on push branch', async () => {
@@ -97,11 +138,12 @@ test('on push branch', async () => {
       tagPrefix: '',
       tagSuffix: '',
       token: '',
+      pullRequestCache: false,
     },
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main',
-    to: 'ghcr.io/int128/sandbox/cache:main',
+    from: ['ghcr.io/int128/sandbox/cache:main'],
+    to: ['ghcr.io/int128/sandbox/cache:main'],
   })
 })
 
@@ -112,6 +154,7 @@ test.each([
     tagPrefix: 'frontend--',
     tagSuffix: '',
     token: '',
+    pullRequestCache: false,
   },
   {
     image: 'ghcr.io/int128/sandbox/cache',
@@ -119,6 +162,7 @@ test.each([
     tagPrefix: '',
     tagSuffix: '',
     token: '',
+    pullRequestCache: false,
   },
 ])('on push branch with prefix %p', async (inputs) => {
   const c = await inferImageTags(
@@ -132,8 +176,8 @@ test.each([
     inputs,
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:frontend--main',
-    to: 'ghcr.io/int128/sandbox/cache:frontend--main',
+    from: ['ghcr.io/int128/sandbox/cache:frontend--main'],
+    to: ['ghcr.io/int128/sandbox/cache:frontend--main'],
   })
 })
 
@@ -144,6 +188,7 @@ test.each([
     tagPrefix: '',
     tagSuffix: '-arm64',
     token: '',
+    pullRequestCache: false,
   },
   {
     image: 'ghcr.io/int128/sandbox/cache',
@@ -151,6 +196,7 @@ test.each([
     tagPrefix: '',
     tagSuffix: '',
     token: '',
+    pullRequestCache: false,
   },
 ])('on push branch with suffix %p', async (inputs) => {
   const c = await inferImageTags(
@@ -164,8 +210,8 @@ test.each([
     inputs,
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main-arm64',
-    to: 'ghcr.io/int128/sandbox/cache:main-arm64',
+    from: ['ghcr.io/int128/sandbox/cache:main-arm64'],
+    to: ['ghcr.io/int128/sandbox/cache:main-arm64'],
   })
 })
 
@@ -176,6 +222,7 @@ test.each([
     tagPrefix: 'frontend--',
     tagSuffix: '-arm64',
     token: '',
+    pullRequestCache: false,
   },
   {
     image: 'ghcr.io/int128/sandbox/cache',
@@ -183,6 +230,7 @@ test.each([
     tagPrefix: '',
     tagSuffix: '',
     token: '',
+    pullRequestCache: false,
   },
   {
     image: 'ghcr.io/int128/sandbox/cache',
@@ -190,6 +238,7 @@ test.each([
     tagPrefix: '',
     tagSuffix: '',
     token: '',
+    pullRequestCache: false,
   },
 ])('on push branch with prefix and suffix %p', async (inputs) => {
   const c = await inferImageTags(
@@ -203,8 +252,8 @@ test.each([
     inputs,
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:frontend--main-arm64',
-    to: 'ghcr.io/int128/sandbox/cache:frontend--main-arm64',
+    from: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
+    to: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
   })
 })
 
@@ -229,11 +278,12 @@ test('on push tag', async () => {
       tagPrefix: '',
       tagSuffix: '',
       token: '',
+      pullRequestCache: false,
     },
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main',
-    to: null,
+    from: ['ghcr.io/int128/sandbox/cache:main'],
+    to: [],
   })
 })
 
@@ -252,10 +302,11 @@ test('on schedule', async () => {
       tagPrefix: '',
       tagSuffix: '',
       token: '',
+      pullRequestCache: false,
     },
   )
   expect(c).toStrictEqual({
-    from: 'ghcr.io/int128/sandbox/cache:main',
-    to: null,
+    from: ['ghcr.io/int128/sandbox/cache:main'],
+    to: [],
   })
 })

@@ -11,6 +11,7 @@ type Inputs = {
   token: string
   extraCacheFrom: string
   extraCacheTo: string
+  pullRequestCache: boolean
 }
 
 type Outputs = {
@@ -20,8 +21,8 @@ type Outputs = {
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
   const c = await inferImageTags(github.context, inputs)
-  core.info(`Inferred image tag of from: ${c.from}`)
-  core.info(`Inferred image tag of to: ${c.to}`)
+  core.info(`Inferred image tag of from: ${c.from.join(', ')}`)
+  core.info(`Inferred image tag of to: ${c.to.join(', ')}`)
   return generateDockerFlags({
     cacheFromImageTag: c.from,
     cacheToImageTag: c.to,
