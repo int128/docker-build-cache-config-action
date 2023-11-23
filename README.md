@@ -49,9 +49,9 @@ cache-from: type=registry,ref=IMAGE:main
 cache-to:
 ```
 
-#### When `pull_request_cache` input is set
+#### Import and export a pull request cache
 
-When `pull_request_cache` input is set, this action instructs docker/build-push-action to import and export cache of the pull request.
+When `pull-request-cache` input is set, this action instructs docker/build-push-action to import and export cache of the pull request.
 
 ```yaml
 cache-from: |
@@ -61,7 +61,9 @@ cache-to: type=registry,ref=IMAGE:pr-1,mode=max
 ```
 
 This is useful when you want to improve build cache between consecutive commits for a same pull request.
-Note: that it will create a tag for every pull request, we recommand to clean it when pull request is closed
+
+Note that it will create an image tag for every pull request.
+It is recommended to clean it when pull request is closed, or set a lifecycle policy in your container repository.
 
 ### `push` event of branch
 

@@ -9,7 +9,7 @@ const main = async (): Promise<void> => {
     tagSuffix: core.getInput('tag-suffix'),
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
-    pullRequestCache: core.getInput('pull-request-cache') === 'true',
+    pullRequestCache: core.getBooleanInput('pull-request-cache'),
     token: core.getInput('token', { required: true }),
   })
   core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
