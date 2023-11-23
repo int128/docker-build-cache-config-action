@@ -28,6 +28,10 @@ inputs:
     description: token to access github api
     required: false
     default: ${{ github.token }}
+  pull-request-cache:
+    description: flag to enable Pull request dedicated cache
+    required: false
+    default: 'false'
 
 outputs:
   cache-from:

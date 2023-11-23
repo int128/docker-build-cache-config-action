@@ -49,6 +49,22 @@ cache-from: type=registry,ref=IMAGE:main
 cache-to:
 ```
 
+#### Import and export a pull request cache
+
+When `pull-request-cache` input is set, this action instructs docker/build-push-action to import and export cache of the pull request.
+
+```yaml
+cache-from: |
+  type=registry,ref=IMAGE:pr-1
+  type=registry,ref=IMAGE:main
+cache-to: type=registry,ref=IMAGE:pr-1,mode=max
+```
+
+This is useful when you want to improve build cache between consecutive commits for a same pull request.
+
+Note that it will create an image tag for every pull request.
+It is recommended to clean it when pull request is closed, or set a lifecycle policy in your container repository.
+
 ### `push` event of branch
 
 When a branch is pushed, this action instructs docker/build-push-action to import and export cache of the branch.
@@ -208,14 +224,15 @@ jobs:
 
 ### Inputs
 
-| Name               | Default    | Description                         |
-| ------------------ | ---------- | ----------------------------------- |
-| `image`            | (required) | Image name to import/export cache   |
-| `flavor`           | ` `        | Flavor in form of `prefix=,suffix=` |
-| `tag-prefix`       | ` `        | Prefix of tag (deprecated)          |
-| `tag-suffix`       | ` `        | Suffix of tag (deprecated)          |
-| `extra-cache-from` | ` `        | Extra flag to `cache-from`          |
-| `extra-cache-to`   | ` `        | Extra flag to `cache-to`            |
+| Name                 | Default    | Description                                 |
+| -------------------- | ---------- | ------------------------------------------- |
+| `image`              | (required) | Image name to import/export cache           |
+| `flavor`             | ` `        | Flavor in form of `prefix=,suffix=`         |
+| `tag-prefix`         | ` `        | Prefix of tag (deprecated)                  |
+| `tag-suffix`         | ` `        | Suffix of tag (deprecated)                  |
+| `extra-cache-from`   | ` `        | Extra flag to `cache-from`                  |
+| `extra-cache-to`     | ` `        | Extra flag to `cache-to`                    |
+| `pull-request-cache` | ``         | Flag to enable Pull request dedicated cache |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
