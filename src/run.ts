@@ -6,8 +6,6 @@ import { generateDockerFlags } from './docker'
 type Inputs = {
   image: string
   flavor: string[]
-  tagPrefix: string
-  tagSuffix: string
   token: string
   extraCacheFrom: string
   extraCacheTo: string

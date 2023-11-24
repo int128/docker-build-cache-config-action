@@ -14,8 +14,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: false,
     },
@@ -28,8 +26,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: true,
     },
@@ -64,8 +60,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: false,
     },
@@ -78,8 +72,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: true,
     },
@@ -135,8 +127,6 @@ test('on push branch', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: false,
     },
@@ -150,17 +140,7 @@ test('on push branch', async () => {
 test.each([
   {
     image: 'ghcr.io/int128/sandbox/cache',
-    flavor: [],
-    tagPrefix: 'frontend--',
-    tagSuffix: '',
-    token: '',
-    pullRequestCache: false,
-  },
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
     flavor: ['prefix=frontend--'],
-    tagPrefix: '',
-    tagSuffix: '',
     token: '',
     pullRequestCache: false,
   },
@@ -184,17 +164,7 @@ test.each([
 test.each([
   {
     image: 'ghcr.io/int128/sandbox/cache',
-    flavor: [],
-    tagPrefix: '',
-    tagSuffix: '-arm64',
-    token: '',
-    pullRequestCache: false,
-  },
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
     flavor: ['suffix=-arm64'],
-    tagPrefix: '',
-    tagSuffix: '',
     token: '',
     pullRequestCache: false,
   },
@@ -218,25 +188,13 @@ test.each([
 test.each([
   {
     image: 'ghcr.io/int128/sandbox/cache',
-    flavor: [],
-    tagPrefix: 'frontend--',
-    tagSuffix: '-arm64',
-    token: '',
-    pullRequestCache: false,
-  },
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
     flavor: ['prefix=frontend--,suffix=-arm64'],
-    tagPrefix: '',
-    tagSuffix: '',
     token: '',
     pullRequestCache: false,
   },
   {
     image: 'ghcr.io/int128/sandbox/cache',
     flavor: ['prefix=frontend--', 'suffix=-arm64'],
-    tagPrefix: '',
-    tagSuffix: '',
     token: '',
     pullRequestCache: false,
   },
@@ -275,8 +233,6 @@ test('on push tag', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: false,
     },
@@ -299,8 +255,6 @@ test('on schedule', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      tagPrefix: '',
-      tagSuffix: '',
       token: '',
       pullRequestCache: false,
     },

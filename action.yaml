@@ -8,16 +8,6 @@ inputs:
   flavor:
     description: flavor
     required: false
-  tag-prefix:
-    description: prefix of image tag
-    required: false
-    deprecationMessage: |
-      use `flavor: prefix=`
-  tag-suffix:
-    description: suffix of image tag
-    required: false
-    deprecationMessage: |
-      use `flavor: suffix=`
   extra-cache-from:
     description: extra flag to cache-from
     required: false

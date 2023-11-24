@@ -7,8 +7,6 @@ type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload' | 'repo' | '
 type Inputs = {
   image: string
   flavor: string[]
-  tagPrefix: string
-  tagSuffix: string
   token: string
   pullRequestCache: boolean
 }
@@ -19,16 +17,8 @@ type Cache = {
 }
 
 export const inferImageTags = async (context: PartialContext, inputs: Inputs): Promise<Cache> => {
-  let { prefix, suffix } = parseFlavor(inputs.flavor)
-  if (inputs.tagPrefix) {
-    prefix = inputs.tagPrefix
-  }
-  if (inputs.tagSuffix) {
-    suffix = inputs.tagSuffix
-  }
-
+  const { prefix, suffix } = parseFlavor(inputs.flavor)
   const b = await inferBranch(context, inputs)
-
   return {
     from: b.from.map((from) => `${inputs.image}:${escape(`${prefix}${from}${suffix}`)}`),
     to: b.to.map((to) => `${inputs.image}:${escape(`${prefix}${to}${suffix}`)}`),
