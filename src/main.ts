@@ -2,11 +2,16 @@ import * as core from '@actions/core'
 import { run } from './run'
 
 const main = async (): Promise<void> => {
+  if (core.getInput('tag-prefix')) {
+    throw new Error('tag-prefix is obsoleted, use flavor instead')
+  }
+  if (core.getInput('tag-suffix')) {
+    throw new Error('tag-suffix is obsoleted, use flavor instead')
+  }
+
   const outputs = await run({
     image: core.getInput('image', { required: true }),
     flavor: core.getMultilineInput('flavor'),
-    tagPrefix: core.getInput('tag-prefix'),
-    tagSuffix: core.getInput('tag-suffix'),
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
     pullRequestCache: core.getBooleanInput('pull-request-cache'),

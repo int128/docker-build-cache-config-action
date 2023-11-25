@@ -232,8 +232,6 @@ jobs:
 | -------------------- | ---------- | ------------------------------------------- |
 | `image`              | (required) | Image name to import/export cache           |
 | `flavor`             | -          | Flavor in form of `prefix=,suffix=`         |
-| `tag-prefix`         | -          | Prefix of tag (deprecated)                  |
-| `tag-suffix`         | -          | Suffix of tag (deprecated)                  |
 | `extra-cache-from`   | -          | Extra flag to `cache-from`                  |
 | `extra-cache-to`     | -          | Extra flag to `cache-to`                    |
 | `pull-request-cache` | -          | Flag to enable Pull request dedicated cache |
