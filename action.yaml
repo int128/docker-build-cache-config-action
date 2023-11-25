@@ -15,7 +15,7 @@ inputs:
     description: Extra flag to cache-to
     required: false
   pull-request-cache:
-    description: Import and export the pull request cache
+    description: Import and export a pull request cache
     required: false
     default: 'false'
   token:

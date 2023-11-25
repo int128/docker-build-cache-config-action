@@ -231,13 +231,13 @@ jobs:
 
 ### Inputs
 
-| Name                 | Default    | Description                              |
-| -------------------- | ---------- | ---------------------------------------- |
-| `image`              | (required) | Image repository to import/export cache  |
-| `flavor`             | -          | Flavor (multiline string)                |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`               |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                 |
-| `pull-request-cache` | -          | Import and export the pull request cache |
+| Name                 | Default    | Description                             |
+| -------------------- | ---------- | --------------------------------------- |
+| `image`              | (required) | Image repository to import/export cache |
+| `flavor`             | -          | Flavor (multiline string)               |
+| `extra-cache-from`   | -          | Extra flag to `cache-from`              |
+| `extra-cache-to`     | -          | Extra flag to `cache-to`                |
+| `pull-request-cache` | -          | Import and export a pull request cache  |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
