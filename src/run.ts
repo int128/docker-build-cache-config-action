@@ -20,12 +20,12 @@ type Outputs = {
 export const run = async (inputs: Inputs): Promise<Outputs> => {
   const octokit = github.getOctokit(inputs.token)
 
-  const imageTags = await inferImageTags(octokit, github.context, inputs)
-  core.info(`Inferred cache-from: ${imageTags.from.join(', ')}`)
-  core.info(`Inferred cache-to: ${imageTags.to.join(', ')}`)
+  const tags = await inferImageTags(octokit, github.context, inputs)
+  core.info(`Inferred cache-from: ${tags.from.join(', ')}`)
+  core.info(`Inferred cache-to: ${tags.to.join(', ')}`)
   return generateDockerFlags({
-    cacheFromImageTag: imageTags.from,
-    cacheToImageTag: imageTags.to,
+    cacheFromImageTag: tags.from,
+    cacheToImageTag: tags.to,
     extraCacheFrom: inputs.extraCacheFrom,
     extraCacheTo: inputs.extraCacheTo,
   })

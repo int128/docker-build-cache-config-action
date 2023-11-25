@@ -17,11 +17,11 @@ type Cache = {
 }
 
 export const inferImageTags = async (octokit: Octokit, context: PartialContext, inputs: Inputs): Promise<Cache> => {
-  const { prefix, suffix } = parseFlavor(inputs.flavor)
+  const flavor = parseFlavor(inputs.flavor)
   const keys = await inferCacheKeys(octokit, context, inputs)
   return {
-    from: keys.from.map((from) => `${inputs.image}:${escape(`${prefix}${from}${suffix}`)}`),
-    to: keys.to.map((to) => `${inputs.image}:${escape(`${prefix}${to}${suffix}`)}`),
+    from: keys.from.map((from) => `${inputs.image}:${escape(`${flavor.prefix}${from}${flavor.suffix}`)}`),
+    to: keys.to.map((to) => `${inputs.image}:${escape(`${flavor.prefix}${to}${flavor.suffix}`)}`),
   }
 }
 
