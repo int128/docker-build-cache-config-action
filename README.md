@@ -1,34 +1,37 @@
 # docker-build-cache-config-action [![ts](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/docker-build-cache-config-action/actions/workflows/ts.yaml)
 
-This is an action to generate `cache-from` and `cache-to` inputs of [docker/build-push-action](https://github.com/docker/build-push-action) for the effective cache strategy in the pull request based development flow.
+This action generates `cache-from` and `cache-to` inputs of [docker/build-push-action](https://github.com/docker/build-push-action) for the effective cache strategy in the pull request based development flow.
 
 ## Problem to solve
 
 [docker/build-push-action](https://github.com/docker/build-push-action) supports the cache management using Buildx (BuildKit).
-It imports and exports cache by the following parameters:
+It can import and export cache by the following parameters:
 
 ```yaml
-cache-from: type=registry,ref=IMAGE
-cache-to: type=registry,ref=IMAGE,mode=max
+cache-from: type=registry,ref=IMAGE:TAG
+cache-to: type=registry,ref=IMAGE:TAG,mode=max
 ```
 
-In the pull request based development flow, the build cache is overwritten by pull requests and it causes cache miss.
+If a single tag is used in the pull request based development flow, it will be overwritten and cause a cache miss.
 For example,
 
-1. Initially the cache points to `main` branch
-1. When pull request B is opened,
+1. Initially, the cache points to main branch
+1. When a pull request B is opened,
+   - It imports the cache of main branch
    - Cache hit
-   - Cache is overwritten to B
-1. When pull request C is opened,
+   - It exports the cache of pull request B
+1. When a pull request C is opened,
+   - It imports the cache of pull request B
    - Cache miss
-   - Cache is overwritten to C
-1. When pull request B is merged into main,
+   - It exports the cache of pull request C
+1. When the pull request B is merged into main,
+   - It imports the cache of pull request C
    - Cache miss
-   - Cache is overwritten to `main` branch
+   - It exports the cache of main branch
 
-## Solution
+## How to solve
 
-This action generates the cache config for the pull request based development flow.
+This action generates the effective cache parameters for the pull request based development flow.
 Basically,
 
 - The cache always points to the base branch
@@ -60,9 +63,9 @@ cache-from: |
 cache-to: type=registry,ref=IMAGE:pr-1,mode=max
 ```
 
-This is useful when you want to improve build cache between consecutive commits for a same pull request.
+This is useful when you want to improve the cache between consecutive commits for a same pull request.
 
-Note that it will create an image tag for every pull request.
+Note that this action creates an image tag for every pull request.
 It is recommended to clean it when pull request is closed, or set a lifecycle policy in your container repository.
 
 ### `issue_comment` event (against a pull request)
@@ -228,13 +231,13 @@ jobs:
 
 ### Inputs
 
-| Name                 | Default    | Description                                 |
-| -------------------- | ---------- | ------------------------------------------- |
-| `image`              | (required) | Image name to import/export cache           |
-| `flavor`             | -          | Flavor in form of `prefix=,suffix=`         |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`                  |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                    |
-| `pull-request-cache` | -          | Flag to enable Pull request dedicated cache |
+| Name                 | Default    | Description                                        |
+| -------------------- | ---------- | -------------------------------------------------- |
+| `image`              | (required) | Image name to import/export cache                  |
+| `flavor`             | -          | Flavor in form of `prefix=,suffix=`                |
+| `extra-cache-from`   | -          | Extra flag to `cache-from`                         |
+| `extra-cache-to`     | -          | Extra flag to `cache-to`                           |
+| `pull-request-cache` | -          | Export and import the pull request dedicated cache |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
