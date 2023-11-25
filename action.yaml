@@ -3,31 +3,31 @@ description: Effective cache with docker/build-push-action for pull request base
 
 inputs:
   image:
-    description: image name to import/export cache
+    description: Image repository to import/export cache
     required: true
   flavor:
-    description: flavor
+    description: Flavor (multiline string)
     required: false
   extra-cache-from:
-    description: extra flag to cache-from
+    description: Extra flag to cache-from
     required: false
   extra-cache-to:
-    description: extra flag to cache-to
+    description: Extra flag to cache-to
     required: false
-  token:
-    description: token to access github api
-    required: false
-    default: ${{ github.token }}
   pull-request-cache:
-    description: flag to enable Pull request dedicated cache
+    description: Import and export a pull request cache
     required: false
     default: 'false'
+  token:
+    description: GitHub token
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   cache-from:
-    description: cache-from parameter
+    description: cache-from parameter for docker/build-push-action
   cache-to:
-    description: cache-to parameter
+    description: cache-to parameter for docker/build-push-action
 
 runs:
   using: 'node20'

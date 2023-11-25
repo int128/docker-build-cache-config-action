@@ -8,8 +8,8 @@ This action generates `cache-from` and `cache-to` inputs of [docker/build-push-a
 It can import and export cache by the following parameters:
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:TAG
-cache-to: type=registry,ref=IMAGE:TAG,mode=max
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:TAG
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:TAG,mode=max
 ```
 
 If a single tag is used in the pull request based development flow, it will be overwritten and cause a cache miss.
@@ -48,7 +48,7 @@ It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
@@ -58,9 +58,9 @@ When `pull-request-cache` input is set, this action instructs docker/build-push-
 
 ```yaml
 cache-from: |
-  type=registry,ref=IMAGE:pr-1
-  type=registry,ref=IMAGE:main
-cache-to: type=registry,ref=IMAGE:pr-1,mode=max
+  type=registry,ref=REGISTRY/REPOSITORY:pr-1
+  type=registry,ref=REGISTRY/REPOSITORY:main
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:pr-1,mode=max
 ```
 
 This is useful when you want to improve the cache between consecutive commits for a same pull request.
@@ -78,8 +78,8 @@ When a branch is pushed, this action instructs docker/build-push-action to impor
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
-cache-to: type=registry,ref=IMAGE:main,mode=max
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:main,mode=max
 ```
 
 ### `push` event of tag
@@ -89,7 +89,7 @@ It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
@@ -100,7 +100,7 @@ It does not export cache to prevent cache pollution.
 For example,
 
 ```yaml
-cache-from: type=registry,ref=IMAGE:main
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
@@ -231,13 +231,13 @@ jobs:
 
 ### Inputs
 
-| Name                 | Default    | Description                                        |
-| -------------------- | ---------- | -------------------------------------------------- |
-| `image`              | (required) | Image name to import/export cache                  |
-| `flavor`             | -          | Flavor in form of `prefix=,suffix=`                |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`                         |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                           |
-| `pull-request-cache` | -          | Export and import the pull request dedicated cache |
+| Name                 | Default    | Description                             |
+| -------------------- | ---------- | --------------------------------------- |
+| `image`              | (required) | Image repository to import/export cache |
+| `flavor`             | -          | Flavor (multiline string)               |
+| `extra-cache-from`   | -          | Extra flag to `cache-from`              |
+| `extra-cache-to`     | -          | Extra flag to `cache-to`                |
+| `pull-request-cache` | -          | Import and export a pull request cache  |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
