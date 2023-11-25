@@ -6,10 +6,10 @@ import { generateDockerFlags } from './docker'
 type Inputs = {
   image: string
   flavor: string[]
-  token: string
   extraCacheFrom: string
   extraCacheTo: string
   pullRequestCache: boolean
+  token: string
 }
 
 type Outputs = {
@@ -18,12 +18,14 @@ type Outputs = {
 }
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
-  const c = await inferImageTags(github.context, inputs)
-  core.info(`Inferred image tag of from: ${c.from.join(', ')}`)
-  core.info(`Inferred image tag of to: ${c.to.join(', ')}`)
+  const octokit = github.getOctokit(inputs.token)
+
+  const imageTags = await inferImageTags(octokit, github.context, inputs)
+  core.info(`Inferred cache-from: ${imageTags.from.join(', ')}`)
+  core.info(`Inferred cache-to: ${imageTags.to.join(', ')}`)
   return generateDockerFlags({
-    cacheFromImageTag: c.from,
-    cacheToImageTag: c.to,
+    cacheFromImageTag: imageTags.from,
+    cacheToImageTag: imageTags.to,
     extraCacheFrom: inputs.extraCacheFrom,
     extraCacheTo: inputs.extraCacheTo,
   })
