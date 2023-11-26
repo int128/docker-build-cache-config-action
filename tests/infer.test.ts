@@ -10,6 +10,8 @@ test.each([
       flavor: [],
       token: '',
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:main'],
@@ -23,6 +25,8 @@ test.each([
       flavor: [],
       token: '',
       pullRequestCache: true,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:pr-123', 'ghcr.io/int128/sandbox/cache:main'],
@@ -46,7 +50,7 @@ test.each([
         },
       },
       repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
+      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
     },
     inputs,
   )
@@ -61,6 +65,8 @@ test.each([
       flavor: [],
       token: '',
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:main'],
@@ -74,6 +80,8 @@ test.each([
       flavor: [],
       token: '',
       pullRequestCache: true,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:pr-123', 'ghcr.io/int128/sandbox/cache:main'],
@@ -116,6 +124,8 @@ test.each([
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:main'],
@@ -129,6 +139,8 @@ test.each([
       flavor: ['prefix=frontend--'],
       token: '',
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:frontend--main'],
@@ -142,6 +154,8 @@ test.each([
       flavor: ['suffix=-arm64'],
       token: '',
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:main-arm64'],
@@ -155,6 +169,8 @@ test.each([
       flavor: ['prefix=frontend--,suffix=-arm64'],
       token: '',
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
@@ -200,6 +216,8 @@ test('on push tag', async () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
   )
   expect(tags).toStrictEqual({
@@ -224,6 +242,8 @@ test('on schedule', async () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
     },
   )
   expect(tags).toStrictEqual({

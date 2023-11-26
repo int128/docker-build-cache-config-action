@@ -68,6 +68,8 @@ Here is the diagram of this cache strategy.
 
 ![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
 
+## Advanced cache strategy
+
 ### Import and export a pull request cache
 
 When a pull request is pushed, it can export a cache to a dedicated tag for the consecutive commits.
@@ -84,6 +86,41 @@ See the example of below section.
 
 Note that it creates an image tag for every pull request.
 It is recommended to clean it when pull request is closed, or set a lifecycle policy into your container repository.
+
+### Build multiple images from a branch
+
+For a complex branch strategy, it needs to build multiple image tags from a branch.
+For example, it builds the following images when the main branch is pushed:
+
+- Build an image tag `development` with the build-args of development environment
+- Build an image tag `staging` with the build-args of staging environment
+
+In this case, it needs to separate the cache for each environment.
+
+```yaml
+# When the main branch is pushed and a build job is triggered for the development environment
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:development
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:development
+
+# When the main branch is pushed and a build job is triggered for the staging environment
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:staging
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:staging
+
+# When a pull request is pushed, fallback to the cache of development environment
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:development
+cache-to:
+```
+
+You can explicitly set a cache key to separate caches for each image.
+
+```yaml
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+    cache-key: ${{ inputs.environment }}
+    cache-key-fallback: development
+```
 
 ## Examples
 
@@ -229,6 +266,50 @@ ghcr.io/${{ github.repository }}/cache:main-linux-amd64
 ghcr.io/${{ github.repository }}/cache:main-linux-arm64
 ```
 
+### Build multiple images from a branch
+
+You can set a cache key to separate caches for each image.
+
+```yaml
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - development
+          - staging
+    steps:
+      - uses: docker/metadata-action@v3
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: suffix=-${{ matrix.environment }}
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ghcr.io/${{ github.repository }}/cache
+          cache-key: ${{ matrix.environment }}
+          cache-key-fallback: development
+      - uses: docker/build-push-action@v2
+        id: build
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}:development
+ghcr.io/${{ github.repository }}:staging
+ghcr.io/${{ github.repository }}/cache:development
+ghcr.io/${{ github.repository }}/cache:staging
+```
+
 ### For monorepo
 
 You can set a tag prefix to store caches into a single repository.
@@ -315,13 +396,15 @@ ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main-cache
 
 ### Inputs
 
-| Name                 | Default    | Description                             |
-| -------------------- | ---------- | --------------------------------------- |
-| `image`              | (required) | Image repository to import/export cache |
-| `flavor`             | -          | Flavor (multiline string)               |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`              |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                |
-| `pull-request-cache` | -          | Import and export a pull request cache  |
+| Name                 | Default    | Description                              |
+| -------------------- | ---------- | ---------------------------------------- |
+| `image`              | (required) | Image repository to import/export cache  |
+| `flavor`             | -          | Flavor (multiline string)                |
+| `extra-cache-from`   | -          | Extra flag to `cache-from`               |
+| `extra-cache-to`     | -          | Extra flag to `cache-to`                 |
+| `pull-request-cache` | -          | Import and export a pull request cache   |
+| `cache-key`          | -          | Explicitly set the cache key             |
+| `cache-key-fallback` | -          | Cache key to fallback (multiline string) |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
