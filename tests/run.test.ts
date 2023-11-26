@@ -8,6 +8,8 @@ describe('Basic usage', () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -30,6 +32,8 @@ describe('Basic usage', () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -66,6 +70,8 @@ describe('Basic usage', () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -95,6 +101,8 @@ describe('Basic usage', () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -119,6 +127,8 @@ describe('Import and export a pull request cache', () => {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: true,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -146,12 +156,71 @@ type=registry,ref=ghcr.io/int128/sandbox/cache:main`,
   })
 })
 
+describe('Build multiple images from a branch', () => {
+  test('push event of main branch', async () => {
+    const outputs = await run({
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: false,
+      cacheKey: 'staging',
+      cacheKeyFallback: ['development'],
+      extraCacheFrom: '',
+      extraCacheTo: '',
+      context: {
+        eventName: 'push',
+        ref: 'refs/heads/main',
+        payload: {},
+        repo: { owner: 'int128', repo: 'sandbox' },
+        issue: { owner: 'int128', repo: 'sandbox', number: 0 },
+      },
+      octokit: getOctokit('GITHUB_TOKEN'),
+    })
+    expect(outputs).toStrictEqual({
+      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:staging',
+      cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:staging,mode=max',
+    })
+  })
+
+  test('pull_request event', async () => {
+    const outputs = await run({
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: false,
+      cacheKey: 'staging',
+      cacheKeyFallback: ['development'],
+      extraCacheFrom: '',
+      extraCacheTo: '',
+      context: {
+        eventName: 'pull_request',
+        ref: 'refs/pull/1/merge',
+        payload: {
+          pull_request: {
+            base: {
+              ref: 'main',
+            },
+            number: 1,
+          },
+        },
+        repo: { owner: 'int128', repo: 'sandbox' },
+        issue: { owner: 'int128', repo: 'sandbox', number: 1 },
+      },
+      octokit: getOctokit('GITHUB_TOKEN'),
+    })
+    expect(outputs).toStrictEqual({
+      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:development',
+      cacheTo: '',
+    })
+  })
+})
+
 describe('Build multi-architecture images', () => {
   test('push event of main branch', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: ['suffix=-arm64'],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: '',
       context: {
@@ -176,6 +245,8 @@ describe('For Amazon ECR', () => {
       image: '123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox',
       flavor: ['suffix=-cache'],
       pullRequestCache: false,
+      cacheKey: '',
+      cacheKeyFallback: [],
       extraCacheFrom: '',
       extraCacheTo: 'image-manifest=true',
       context: {

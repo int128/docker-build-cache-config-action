@@ -14,6 +14,8 @@ const main = async (): Promise<void> => {
     image: core.getInput('image', { required: true }),
     flavor: core.getMultilineInput('flavor'),
     pullRequestCache: core.getBooleanInput('pull-request-cache'),
+    cacheKey: core.getInput('cache-key'),
+    cacheKeyFallback: core.getMultilineInput('cache-key-fallback'),
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
     context: github.context,

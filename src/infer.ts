@@ -1,10 +1,14 @@
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
 import { Context, Octokit } from './github'
 
+const trimPrefix = (s: string, prefix: string) => (s.startsWith(prefix) ? s.substring(prefix.length) : s)
+
 type Inputs = {
   image: string
   flavor: string[]
   pullRequestCache: boolean
+  cacheKey: string
+  cacheKeyFallback: string[]
 }
 
 type Cache = {
@@ -39,95 +43,131 @@ const parseFlavor = (flavor: string[]) => {
 }
 
 const inferCacheKeys = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
-  switch (context.eventName) {
-    case 'issue_comment':
-      return inferIssueCommentBranch(octokit, context, inputs)
-
-    case 'pull_request':
-      return inferPullRequestBranch(context, inputs)
-
-    case 'push':
-      return inferPushBranch(context)
+  if (context.eventName === 'push' && context.ref.startsWith('refs/heads/')) {
+    return handlePushBranchEvent(context, inputs)
   }
+  if (context.eventName === 'push' && context.ref.startsWith('refs/tags/')) {
+    return handlePushTagEvent(context, inputs)
+  }
+  if (context.eventName === 'pull_request') {
+    return handlePullRequestEvent(context, inputs)
+  }
+  if (isPullRequestCommentEvent(context)) {
+    return handlePullRequestCommentEvent(octokit, context, inputs)
+  }
+  return fallbackToImportOnly(context, inputs)
+}
 
+const handlePushBranchEvent = (context: Context, inputs: Inputs): Cache => {
+  if (inputs.cacheKey) {
+    return {
+      from: [inputs.cacheKey],
+      to: [inputs.cacheKey],
+    }
+  }
+  const currentBranch = trimPrefix(context.ref, 'refs/heads/')
   return {
-    from: [trimPrefix(context.ref, 'refs/heads/')],
-    to: [],
+    from: [currentBranch],
+    to: [currentBranch],
   }
 }
 
-const inferIssueCommentBranch = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
-  const payload = context.payload as IssueCommentEvent
-  if (!payload.issue.pull_request?.url) {
+const handlePushTagEvent = (context: Context, inputs: Inputs): Cache => {
+  if (inputs.cacheKeyFallback.length > 0) {
     return {
-      from: [payload.repository.default_branch],
+      from: inputs.cacheKeyFallback,
       to: [],
     }
   }
 
-  const pull = await octokit.rest.pulls.get({
+  const payload = context.payload as PushEvent
+  const defaultBranch = payload.repository.default_branch
+  return {
+    from: [defaultBranch],
+    to: [],
+  }
+}
+
+const handlePullRequestEvent = (context: Context, inputs: Inputs): Cache => {
+  const pullRequestCacheKey = `pr-${context.issue.number}`
+  if (inputs.cacheKeyFallback.length > 0) {
+    if (inputs.pullRequestCache) {
+      return {
+        from: [pullRequestCacheKey, ...inputs.cacheKeyFallback],
+        to: [pullRequestCacheKey],
+      }
+    }
+    return {
+      from: inputs.cacheKeyFallback,
+      to: [],
+    }
+  }
+
+  const payload = context.payload as PullRequestEvent
+  const baseBranch = payload.pull_request.base.ref
+  if (inputs.pullRequestCache) {
+    return {
+      from: [pullRequestCacheKey, baseBranch],
+      to: [pullRequestCacheKey],
+    }
+  }
+  return {
+    from: [baseBranch],
+    to: [],
+  }
+}
+
+const isPullRequestCommentEvent = (context: Context): boolean => {
+  if (context.eventName === 'issue_comment') {
+    const payload = context.payload as IssueCommentEvent
+    return payload.issue?.pull_request?.url !== undefined
+  }
+  return false
+}
+
+const handlePullRequestCommentEvent = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
+  const pullRequestCacheKey = `pr-${context.issue.number}`
+  if (inputs.cacheKeyFallback.length > 0) {
+    if (inputs.pullRequestCache) {
+      return {
+        from: [pullRequestCacheKey, ...inputs.cacheKeyFallback],
+        to: [pullRequestCacheKey],
+      }
+    }
+    return {
+      from: inputs.cacheKeyFallback,
+      to: [],
+    }
+  }
+
+  const { data: pull } = await octokit.rest.pulls.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: context.issue.number,
   })
-
-  return inferPullRequestData(
-    {
-      ref: pull.data.base.ref,
-      number: pull.data.number,
-    },
-    inputs,
-  )
-}
-
-const inferPullRequestBranch = (context: Context, inputs: Inputs): Cache => {
-  const payload = context.payload as PullRequestEvent
-  return inferPullRequestData(
-    {
-      ref: payload.pull_request.base.ref,
-      number: payload.pull_request.number,
-    },
-    inputs,
-  )
-}
-
-type PullRequestData = {
-  ref: PullRequestEvent['pull_request']['base']['ref']
-  number: PullRequestEvent['pull_request']['number']
-}
-
-const inferPullRequestData = ({ ref, number }: PullRequestData, inputs: Inputs): Cache => {
-  if (!inputs.pullRequestCache) {
+  const baseBranch = pull.base.ref
+  if (inputs.pullRequestCache) {
     return {
-      from: [ref],
-      to: [],
+      from: [pullRequestCacheKey, baseBranch],
+      to: [pullRequestCacheKey],
     }
   }
-
-  const pullRequestCache = `pr-${number}`
-
   return {
-    from: [pullRequestCache, ref],
-    to: [pullRequestCache],
-  }
-}
-
-const inferPushBranch = (context: Context): Cache => {
-  // branch push
-  if (context.ref.startsWith('refs/heads/')) {
-    const branchName = trimPrefix(context.ref, 'refs/heads/')
-    return {
-      from: [branchName],
-      to: [branchName],
-    }
-  }
-
-  // tag push
-  const payload = context.payload as PushEvent
-  return {
-    from: [payload.repository.default_branch],
+    from: [baseBranch],
     to: [],
   }
 }
 
-const trimPrefix = (s: string, prefix: string) => (s.startsWith(prefix) ? s.substring(prefix.length) : s)
+const fallbackToImportOnly = (context: Context, inputs: Inputs): Cache => {
+  if (inputs.cacheKeyFallback.length > 0) {
+    return {
+      from: inputs.cacheKeyFallback,
+      to: [],
+    }
+  }
+  const currentBranch = trimPrefix(context.ref, 'refs/heads/')
+  return {
+    from: [currentBranch],
+    to: [],
+  }
+}
