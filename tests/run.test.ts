@@ -1,5 +1,6 @@
 import fetchMock from 'fetch-mock'
 import { run } from '../src/run'
+import { getOctokit } from '@actions/github'
 
 describe('integration tests', () => {
   test('push event of a branch', async () => {
@@ -16,7 +17,7 @@ describe('integration tests', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      token: 'GITHUB_TOKEN',
+      octokit: getOctokit('GITHUB_TOKEN'),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -45,7 +46,7 @@ describe('integration tests', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      token: 'GITHUB_TOKEN',
+      octokit: getOctokit('GITHUB_TOKEN'),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -74,7 +75,7 @@ describe('integration tests', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      token: 'GITHUB_TOKEN',
+      octokit: getOctokit('GITHUB_TOKEN'),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: `\
@@ -91,6 +92,7 @@ type=registry,ref=ghcr.io/int128/sandbox/cache:main`,
       },
       number: 1,
     })
+    const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
@@ -111,8 +113,7 @@ type=registry,ref=ghcr.io/int128/sandbox/cache:main`,
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      token: 'GITHUB_TOKEN',
-      octokitOptions: { request: { fetch } },
+      octokit,
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',

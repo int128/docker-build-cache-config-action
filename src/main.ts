@@ -17,7 +17,7 @@ const main = async (): Promise<void> => {
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
     context: github.context,
-    token: core.getInput('token', { required: true }),
+    octokit: github.getOctokit(core.getInput('token', { required: true })),
   })
   core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
   core.setOutput('cache-from', outputs.cacheFrom)
