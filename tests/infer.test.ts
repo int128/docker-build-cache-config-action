@@ -4,6 +4,7 @@ import { inferImageTags } from '../src/infer'
 
 test.each([
   {
+    description: 'default',
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
@@ -16,6 +17,7 @@ test.each([
     },
   },
   {
+    description: 'pull-request-cache',
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
@@ -27,7 +29,7 @@ test.each([
       to: ['ghcr.io/int128/sandbox/cache:pr-123'],
     },
   },
-])('on pull request %p', async ({ inputs, expected }) => {
+])('on pull_request with $description', async ({ inputs, expected }) => {
   const fetch = fetchMock.sandbox()
   const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
   const tags = await inferImageTags(
@@ -53,6 +55,7 @@ test.each([
 
 test.each([
   {
+    description: 'default',
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
@@ -65,6 +68,7 @@ test.each([
     },
   },
   {
+    description: 'pull-request-cache',
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
@@ -76,7 +80,7 @@ test.each([
       to: ['ghcr.io/int128/sandbox/cache:pr-123'],
     },
   },
-])('on pull request comment %p', async ({ inputs, expected }) => {
+])('on issue_comment of pull request with $description', async ({ inputs, expected }) => {
   const fetch = fetchMock.sandbox().getOnce('https://api.github.com/repos/int128/sandbox/pulls/123', {
     base: {
       ref: 'main',
@@ -105,38 +109,59 @@ test.each([
   expect(tags).toStrictEqual(expected)
 })
 
-test('on push branch', async () => {
-  const fetch = fetchMock.sandbox()
-  const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
-  const tags = await inferImageTags(
-    octokit,
-    {
-      eventName: 'push',
-      ref: 'refs/heads/main',
-      payload: {},
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
-    {
+test.each([
+  {
+    description: 'default',
+    inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
     },
-  )
-  expect(tags).toStrictEqual({
-    from: ['ghcr.io/int128/sandbox/cache:main'],
-    to: ['ghcr.io/int128/sandbox/cache:main'],
-  })
-})
-
-test.each([
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
-    flavor: ['prefix=frontend--'],
-    token: '',
-    pullRequestCache: false,
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:main'],
+      to: ['ghcr.io/int128/sandbox/cache:main'],
+    },
   },
-])('on push branch with prefix %p', async (inputs) => {
+  {
+    description: 'prefix',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: ['prefix=frontend--'],
+      token: '',
+      pullRequestCache: false,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:frontend--main'],
+      to: ['ghcr.io/int128/sandbox/cache:frontend--main'],
+    },
+  },
+  {
+    description: 'suffix',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: ['suffix=-arm64'],
+      token: '',
+      pullRequestCache: false,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:main-arm64'],
+      to: ['ghcr.io/int128/sandbox/cache:main-arm64'],
+    },
+  },
+  {
+    description: 'prefix and suffix',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: ['prefix=frontend--,suffix=-arm64'],
+      token: '',
+      pullRequestCache: false,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
+      to: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
+    },
+  },
+])('on push branch with $description', async ({ inputs, expected }) => {
   const fetch = fetchMock.sandbox()
   const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
   const tags = await inferImageTags(
@@ -150,70 +175,7 @@ test.each([
     },
     inputs,
   )
-  expect(tags).toStrictEqual({
-    from: ['ghcr.io/int128/sandbox/cache:frontend--main'],
-    to: ['ghcr.io/int128/sandbox/cache:frontend--main'],
-  })
-})
-
-test.each([
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
-    flavor: ['suffix=-arm64'],
-    token: '',
-    pullRequestCache: false,
-  },
-])('on push branch with suffix %p', async (inputs) => {
-  const fetch = fetchMock.sandbox()
-  const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
-  const tags = await inferImageTags(
-    octokit,
-    {
-      eventName: 'push',
-      ref: 'refs/heads/main',
-      payload: {},
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
-    inputs,
-  )
-  expect(tags).toStrictEqual({
-    from: ['ghcr.io/int128/sandbox/cache:main-arm64'],
-    to: ['ghcr.io/int128/sandbox/cache:main-arm64'],
-  })
-})
-
-test.each([
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
-    flavor: ['prefix=frontend--,suffix=-arm64'],
-    token: '',
-    pullRequestCache: false,
-  },
-  {
-    image: 'ghcr.io/int128/sandbox/cache',
-    flavor: ['prefix=frontend--', 'suffix=-arm64'],
-    token: '',
-    pullRequestCache: false,
-  },
-])('on push branch with prefix and suffix %p', async (inputs) => {
-  const fetch = fetchMock.sandbox()
-  const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
-  const tags = await inferImageTags(
-    octokit,
-    {
-      eventName: 'push',
-      ref: 'refs/heads/main',
-      payload: {},
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
-    inputs,
-  )
-  expect(tags).toStrictEqual({
-    from: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
-    to: ['ghcr.io/int128/sandbox/cache:frontend--main-arm64'],
-  })
+  expect(tags).toStrictEqual(expected)
 })
 
 test('on push tag', async () => {
