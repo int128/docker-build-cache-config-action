@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import { run } from './run'
 
 const main = async (): Promise<void> => {
@@ -12,10 +13,11 @@ const main = async (): Promise<void> => {
   const outputs = await run({
     image: core.getInput('image', { required: true }),
     flavor: core.getMultilineInput('flavor'),
+    pullRequestCache: core.getBooleanInput('pull-request-cache'),
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
-    pullRequestCache: core.getBooleanInput('pull-request-cache'),
-    token: core.getInput('token', { required: true }),
+    context: github.context,
+    octokit: github.getOctokit(core.getInput('token', { required: true })),
   })
   core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
   core.setOutput('cache-from', outputs.cacheFrom)

@@ -1,15 +1,16 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
+import { Context, Octokit } from './github'
 import { inferImageTags } from './infer'
 import { generateDockerFlags } from './docker'
 
 type Inputs = {
   image: string
   flavor: string[]
+  pullRequestCache: boolean
   extraCacheFrom: string
   extraCacheTo: string
-  pullRequestCache: boolean
-  token: string
+  context: Context
+  octokit: Octokit
 }
 
 type Outputs = {
@@ -18,9 +19,11 @@ type Outputs = {
 }
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
-  const octokit = github.getOctokit(inputs.token)
-
-  const tags = await inferImageTags(octokit, github.context, inputs)
+  const tags = await inferImageTags(inputs.octokit, inputs.context, {
+    image: inputs.image,
+    flavor: inputs.flavor,
+    pullRequestCache: inputs.pullRequestCache,
+  })
   core.info(`Inferred cache-from: ${tags.from.join(', ')}`)
   core.info(`Inferred cache-to: ${tags.to.join(', ')}`)
   return generateDockerFlags({
