@@ -89,6 +89,28 @@ describe('Basic usage', () => {
       cacheTo: '',
     })
   })
+
+  test('schedule event', async () => {
+    const outputs = await run({
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: false,
+      extraCacheFrom: '',
+      extraCacheTo: '',
+      context: {
+        eventName: 'schedule',
+        ref: 'refs/heads/main',
+        payload: {},
+        repo: { owner: 'int128', repo: 'sandbox' },
+        issue: { owner: 'int128', repo: 'sandbox', number: 0 },
+      },
+      octokit: getOctokit('GITHUB_TOKEN'),
+    })
+    expect(outputs).toStrictEqual({
+      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
+      cacheTo: '',
+    })
+  })
 })
 
 describe('Import and export a pull request cache', () => {
