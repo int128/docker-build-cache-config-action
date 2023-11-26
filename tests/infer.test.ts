@@ -120,7 +120,6 @@ test('on push branch', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
   )
@@ -238,7 +237,6 @@ test('on push tag', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
   )
@@ -263,7 +261,6 @@ test('on schedule', async () => {
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
   )

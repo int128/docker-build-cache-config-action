@@ -1,13 +1,9 @@
-import { Context } from '@actions/github/lib/context'
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
-import { Octokit } from './github'
-
-type PartialContext = Pick<Context, 'eventName' | 'ref' | 'payload' | 'repo' | 'issue'>
+import { Context, Octokit } from './github'
 
 type Inputs = {
   image: string
   flavor: string[]
-  token: string
   pullRequestCache: boolean
 }
 
@@ -16,7 +12,7 @@ type Cache = {
   to: string[]
 }
 
-export const inferImageTags = async (octokit: Octokit, context: PartialContext, inputs: Inputs): Promise<Cache> => {
+export const inferImageTags = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
   const flavor = parseFlavor(inputs.flavor)
   const keys = await inferCacheKeys(octokit, context, inputs)
   return {
@@ -42,7 +38,7 @@ const parseFlavor = (flavor: string[]) => {
   return { prefix, suffix }
 }
 
-const inferCacheKeys = async (octokit: Octokit, context: PartialContext, inputs: Inputs): Promise<Cache> => {
+const inferCacheKeys = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
   switch (context.eventName) {
     case 'issue_comment':
       return inferIssueCommentBranch(octokit, context, inputs)
@@ -60,7 +56,7 @@ const inferCacheKeys = async (octokit: Octokit, context: PartialContext, inputs:
   }
 }
 
-const inferIssueCommentBranch = async (octokit: Octokit, context: PartialContext, inputs: Inputs): Promise<Cache> => {
+const inferIssueCommentBranch = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
   const payload = context.payload as IssueCommentEvent
   if (!payload.issue.pull_request?.url) {
     return {
@@ -84,7 +80,7 @@ const inferIssueCommentBranch = async (octokit: Octokit, context: PartialContext
   )
 }
 
-const inferPullRequestBranch = (context: PartialContext, inputs: Inputs): Cache => {
+const inferPullRequestBranch = (context: Context, inputs: Inputs): Cache => {
   const payload = context.payload as PullRequestEvent
   return inferPullRequestData(
     {
@@ -116,7 +112,7 @@ const inferPullRequestData = ({ ref, number }: PullRequestData, inputs: Inputs):
   }
 }
 
-const inferPushBranch = (context: PartialContext): Cache => {
+const inferPushBranch = (context: Context): Cache => {
   // branch push
   if (context.ref.startsWith('refs/heads/')) {
     const branchName = trimPrefix(context.ref, 'refs/heads/')
