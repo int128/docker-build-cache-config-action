@@ -5,56 +5,73 @@ This action generates `cache-from` and `cache-to` inputs of [docker/build-push-a
 ## Problem to solve
 
 [docker/build-push-action](https://github.com/docker/build-push-action) supports the cache management using Buildx (BuildKit).
-It can import and export cache by the following parameters:
+It can import and export a cache by the following parameters:
 
 ```yaml
 cache-from: type=registry,ref=REGISTRY/REPOSITORY:TAG
 cache-to: type=registry,ref=REGISTRY/REPOSITORY:TAG,mode=max
 ```
 
-If a single tag is used in the pull request based development flow, it will be overwritten and cause a cache miss.
+If a same tag is used in the pull request based development flow, it will cause a cache miss.
 For example,
 
 1. Initially, the cache points to main branch
 1. When a pull request B is opened,
    - It imports the cache of main branch
-   - Cache hit
+   - The cache hits
    - It exports the cache of pull request B
 1. When a pull request C is opened,
    - It imports the cache of pull request B
-   - Cache miss
+   - The cache misses
    - It exports the cache of pull request C
 1. When the pull request B is merged into main,
    - It imports the cache of pull request C
-   - Cache miss
+   - The cache misses
    - It exports the cache of main branch
+
+Therefore, it needs to prevent the cache pollution caused by a pull request.
 
 ## How to solve
 
-This action generates the effective cache parameters for the pull request based development flow.
-Basically,
+Keep a cache tag tracking the corresponding branch.
 
-- The cache always points to the base branch
-- Don't export the cache on pull request
+When the main branch is pushed, it imports a cache from the main tag.
+It finally exports a cache to the main tag for the future build.
 
-It reduces the time to build a container image.
+```yaml
+cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:main,mode=max
+```
 
-![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
-
-### `pull_request` event
-
-When a pull request is opened, this action instructs docker/build-push-action to import cache of the base branch.
-It does not export cache to prevent cache pollution.
-For example,
+When a pull request is pushed, it only imports a cache from the main tag.
+It does not export a cache to the main tag to prevent the cache pollution.
 
 ```yaml
 cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
-#### Import and export a pull request cache
+This action generates the cache parameters by this strategy.
 
-When `pull-request-cache` input is set, this action instructs docker/build-push-action to import and export cache of the pull request.
+```yaml
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+- uses: docker/build-push-action@v2
+  with:
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+Here is the diagram of this cache strategy.
+
+![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
+
+### Import and export a pull request cache
+
+When a pull request is pushed, it can export a cache to a dedicated tag for the consecutive commits.
+It imports the cache from the dedicated tag when the pull request is pushed again.
 
 ```yaml
 cache-from: |
@@ -63,50 +80,16 @@ cache-from: |
 cache-to: type=registry,ref=REGISTRY/REPOSITORY:pr-1,mode=max
 ```
 
-This is useful when you want to improve the cache between consecutive commits for a same pull request.
+See the example of below section.
 
-Note that this action creates an image tag for every pull request.
-It is recommended to clean it when pull request is closed, or set a lifecycle policy in your container repository.
-
-### `issue_comment` event (against a pull request)
-
-When a comment is added to a pull request, this action behaves the same as `pull_request` event.
-
-### `push` event of branch
-
-When a branch is pushed, this action instructs docker/build-push-action to import and export cache of the branch.
-For example,
-
-```yaml
-cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
-cache-to: type=registry,ref=REGISTRY/REPOSITORY:main,mode=max
-```
-
-### `push` event of tag
-
-When a tag is pushed, this action instructs docker/build-push-action to import cache of the default branch.
-It does not export cache to prevent cache pollution.
-For example,
-
-```yaml
-cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
-cache-to:
-```
-
-### Other events
-
-Otherwise, this action instructs docker/build-push-action to import cache of the triggered branch.
-It does not export cache to prevent cache pollution.
-For example,
-
-```yaml
-cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
-cache-to:
-```
+Note that it creates an image tag for every pull request.
+It is recommended to clean it when pull request is closed, or set a lifecycle policy into your container repository.
 
 ## Examples
 
-Here is an example to use cache on GHCR (GitHub Container Registry).
+### Basic usage
+
+Here is an example to manage a cache in GHCR (GitHub Container Registry).
 
 ```yaml
 - uses: docker/metadata-action@v3
@@ -127,9 +110,82 @@ Here is an example to use cache on GHCR (GitHub Container Registry).
     cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
-### For multi-architecture image
+It will create the following image tags:
 
-You can set a tag suffix to isolate caches.
+```
+ghcr.io/${{ github.repository }}:main
+ghcr.io/${{ github.repository }}:pr-1
+ghcr.io/${{ github.repository }}/cache:main
+```
+
+### Store image and cache into a repository
+
+You can set a tag suffix to store both image and cache into the same repository.
+
+```yaml
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}
+    flavor: suffix=-cache
+- uses: docker/build-push-action@v2
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}:main
+ghcr.io/${{ github.repository }}:main-cache
+ghcr.io/${{ github.repository }}:pr-1
+```
+
+### Import and export a pull request cache
+
+You can enable the pull request cache feature.
+
+```yaml
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+    pull-request-cache: true
+- uses: docker/build-push-action@v2
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}:main
+ghcr.io/${{ github.repository }}:pr-1
+ghcr.io/${{ github.repository }}/cache:main
+ghcr.io/${{ github.repository }}/cache:pr-1
+```
+
+### Build multi-architecture images
+
+You can set a tag suffix to isolate caches for each architecture.
 
 ```yaml
 jobs:
@@ -162,9 +218,20 @@ jobs:
           platforms: ${{ matrix.platform }}
 ```
 
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}:main-linux-amd64
+ghcr.io/${{ github.repository }}:main-linux-arm64
+ghcr.io/${{ github.repository }}:pr-1-linux-amd64
+ghcr.io/${{ github.repository }}:pr-1-linux-arm64
+ghcr.io/${{ github.repository }}/cache:main-linux-amd64
+ghcr.io/${{ github.repository }}/cache:main-linux-arm64
+```
+
 ### For monorepo
 
-You can set a tag prefix to isolate caches.
+You can set a tag prefix to store caches into a single repository.
 
 ```yaml
 - uses: docker/metadata-action@v3
@@ -186,12 +253,20 @@ You can set a tag prefix to isolate caches.
     cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}/microservice-name:main
+ghcr.io/${{ github.repository }}/microservice-name:pr-1
+ghcr.io/${{ github.repository }}/cache:microservice-name--main
+```
+
 ### For Amazon ECR
 
 Amazon ECR now supports the cache manifest ([aws/containers-roadmap#876](https://github.com/aws/containers-roadmap/issues/876)).
-This action supports the extra attribute `image-manifest=true` by `extra-cache-to` input.
+You can pass the extra attribute `image-manifest=true` by `extra-cache-to` input of this action.
 
-Here is an example to use the cache in an Amazon ECR repository.
+Here is an example to manage a cache in Amazon ECR.
 
 ```yaml
 jobs:
@@ -215,7 +290,8 @@ jobs:
       - uses: int128/docker-build-cache-config-action@v1
         id: cache
         with:
-          image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}/cache
+          image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
+          suffix: -cache
           extra-cache-to: image-manifest=true
       - uses: docker/build-push-action@v5
         id: build
@@ -225,6 +301,14 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           cache-from: ${{ steps.cache.outputs.cache-from }}
           cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:pr-1
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main-cache
 ```
 
 ## Specification
@@ -250,3 +334,18 @@ except this action supports only `prefix` and `suffix`.
 | ------------ | -------------------------------------- |
 | `cache-from` | Parameter for docker/build-push-action |
 | `cache-to`   | Parameter for docker/build-push-action |
+
+### Events
+
+This action exports a cache on the following events:
+
+- `push` event to a branch
+- `pull_request` event (only if `pull-request-cache` is set)
+- `issue_comment` event to a pull request (only if `pull-request-cache` is set)
+
+It imports a cache of the base branch on the following events:
+
+- `pull_request` event
+- `issue_comment` event
+
+It always imports a cache of the default branch.
