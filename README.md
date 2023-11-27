@@ -51,6 +51,10 @@ cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
+Here is the diagram of this cache strategy.
+
+![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
+
 This action generates the cache parameters by this strategy.
 
 ```yaml
@@ -63,27 +67,6 @@ This action generates the cache parameters by this strategy.
     cache-from: ${{ steps.cache.outputs.cache-from }}
     cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
-
-Here is the diagram of this cache strategy.
-
-![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
-
-### Import and export a pull request cache
-
-When a pull request is pushed, it can export a cache to a dedicated tag for the consecutive commits.
-It imports the cache from the dedicated tag when the pull request is pushed again.
-
-```yaml
-cache-from: |
-  type=registry,ref=REGISTRY/REPOSITORY:pr-1
-  type=registry,ref=REGISTRY/REPOSITORY:main
-cache-to: type=registry,ref=REGISTRY/REPOSITORY:pr-1,mode=max
-```
-
-See the example of below section.
-
-Note that it creates an image tag for every pull request.
-It is recommended to clean it when pull request is closed, or set a lifecycle policy into your container repository.
 
 ## Examples
 
@@ -150,9 +133,70 @@ ghcr.io/${{ github.repository }}:main-cache
 ghcr.io/${{ github.repository }}:pr-1
 ```
 
+### For Amazon ECR
+
+Amazon ECR now supports the cache manifest ([aws/containers-roadmap#876](https://github.com/aws/containers-roadmap/issues/876)).
+You can pass the extra attribute `image-manifest=true`.
+Here is an example to manage a cache in Amazon ECR.
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image-uri: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}@${{ steps.build.outputs.digest }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::ACCOUNT:role/ROLE
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: ecr
+      - uses: docker/metadata-action@v5
+        id: metadata
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
+          suffix: -cache
+          extra-cache-to: image-manifest=true
+      - uses: docker/build-push-action@v5
+        id: build
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:pr-1
+ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main-cache
+```
+
+## Advanced cache strategy
+
 ### Import and export a pull request cache
 
-You can enable the pull request cache feature.
+When a pull request is pushed, it can export a cache to a dedicated tag for the consecutive commits.
+It imports the cache from the dedicated tag when the pull request is pushed again.
+
+```yaml
+cache-from: |
+  type=registry,ref=REGISTRY/REPOSITORY:pr-1
+  type=registry,ref=REGISTRY/REPOSITORY:main
+cache-to: type=registry,ref=REGISTRY/REPOSITORY:pr-1,mode=max
+```
+
+Here is an example to enable the pull request cache feature.
 
 ```yaml
 - uses: docker/metadata-action@v3
@@ -182,6 +226,9 @@ ghcr.io/${{ github.repository }}:pr-1
 ghcr.io/${{ github.repository }}/cache:main
 ghcr.io/${{ github.repository }}/cache:pr-1
 ```
+
+Note that it creates an image tag for every pull request.
+It is recommended to clean it when pull request is closed, or set a lifecycle policy into your container repository.
 
 ### Build multi-architecture images
 
@@ -231,7 +278,7 @@ ghcr.io/${{ github.repository }}/cache:main-linux-arm64
 
 ### For monorepo
 
-You can set a tag prefix to store caches into a single repository.
+You can set a tag prefix to store caches of multiple images into a single repository.
 
 ```yaml
 - uses: docker/metadata-action@v3
@@ -259,56 +306,6 @@ It will create the following image tags:
 ghcr.io/${{ github.repository }}/microservice-name:main
 ghcr.io/${{ github.repository }}/microservice-name:pr-1
 ghcr.io/${{ github.repository }}/cache:microservice-name--main
-```
-
-### For Amazon ECR
-
-Amazon ECR now supports the cache manifest ([aws/containers-roadmap#876](https://github.com/aws/containers-roadmap/issues/876)).
-You can pass the extra attribute `image-manifest=true` by `extra-cache-to` input of this action.
-
-Here is an example to manage a cache in Amazon ECR.
-
-```yaml
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    outputs:
-      image-uri: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}@${{ steps.build.outputs.digest }}
-    steps:
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::ACCOUNT:role/ROLE
-      - uses: aws-actions/amazon-ecr-login@v1
-        id: ecr
-      - uses: docker/metadata-action@v5
-        id: metadata
-        with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
-      - uses: int128/docker-build-cache-config-action@v1
-        id: cache
-        with:
-          image: ${{ steps.ecr.outputs.registry }}/${{ github.repository }}
-          suffix: -cache
-          extra-cache-to: image-manifest=true
-      - uses: docker/build-push-action@v5
-        id: build
-        with:
-          push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: ${{ steps.cache.outputs.cache-from }}
-          cache-to: ${{ steps.cache.outputs.cache-to }}
-```
-
-It will create the following image tags:
-
-```
-ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main
-ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:pr-1
-ACCOUNT.dkr.ecr.REGION.amazonaws.com/${{ github.repository }}:main-cache
 ```
 
 ## Specification
