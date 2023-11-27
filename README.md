@@ -308,6 +308,69 @@ ghcr.io/${{ github.repository }}/microservice-name:pr-1
 ghcr.io/${{ github.repository }}/cache:microservice-name--main
 ```
 
+### Build multiple image tags from a branch
+
+For a complex project, it needs to build multiple image tags from a branch.
+For example, it builds the following images when the main branch is pushed:
+
+- Build an image tag `development` with the build-args of development environment
+- Build an image tag `staging` with the build-args of staging environment
+
+In this case, it needs to separate the cache for each environment as follows:
+
+- When the main branch is pushed,
+  - A job builds an image for the development environment.
+    It imports and exports a cache from/to `development` tag.
+  - A job builds an image for the staging environment.
+    It imports and exports a cache from/to `staging` tag.
+- When a pull request is created or updated,
+  - A job builds an image for the pull request environment.
+    It imports a cache from `development` tag.
+
+You can set a suffix to separate the caches for each environment.
+
+```yaml
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - development
+          - staging
+    steps:
+      - uses: docker/metadata-action@v3
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: suffix=-${{ matrix.environment }}
+      - uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ghcr.io/${{ github.repository }}
+          flavor: suffix=-${{ matrix.environment }}-cache
+      - uses: docker/build-push-action@v2
+        id: build
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          # Always fallback to the cache of development environment
+          cache-from: |
+            ${{ steps.cache.outputs.cache-from }}
+            type=registry,ref=ghcr.io/${{ github.repository }}:main-development-cache
+          cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
+It will create the following image tags:
+
+```
+ghcr.io/${{ github.repository }}:main-development
+ghcr.io/${{ github.repository }}:main-development-cache
+ghcr.io/${{ github.repository }}:main-staging
+ghcr.io/${{ github.repository }}:main-staging-cache
+```
+
 ## Specification
 
 ### Inputs
