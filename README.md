@@ -51,6 +51,15 @@ cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to:
 ```
 
+If the base branch of the pull request is not main, it imports both base tag and main tag.
+
+```yaml
+cache-from: |
+  type=registry,ref=REGISTRY/REPOSITORY:base
+  type=registry,ref=REGISTRY/REPOSITORY:main
+cache-to:
+```
+
 Here is the diagram of this cache strategy.
 
 ![effective-build-cache-diagram](effective-build-cache-diagram.drawio.svg)
