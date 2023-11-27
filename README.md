@@ -43,7 +43,7 @@ cache-from: type=registry,ref=REGISTRY/REPOSITORY:main
 cache-to: type=registry,ref=REGISTRY/REPOSITORY:main,mode=max
 ```
 
-When a pull request is pushed, it only imports a cache from the main tag.
+When a pull request is created or updated, it only imports a cache from the main tag.
 It does not export a cache to the main tag to prevent the cache pollution.
 
 ```yaml
@@ -400,12 +400,25 @@ except this action supports only `prefix` and `suffix`.
 This action exports a cache on the following events:
 
 - `push` event to a branch
-- `pull_request` event (only if `pull-request-cache` is set)
-- `issue_comment` event to a pull request (only if `pull-request-cache` is set)
-
-It imports a cache of the base branch on the following events:
-
+  - Export a cache to the tag corresponding to the pushed branch
 - `pull_request` event
-- `issue_comment` event
+  - Export a cache to the tag corresponding to the pull request number (only if `pull-request-cache` is set)
+- `issue_comment` event to a pull request
+  - Export a cache to the tag corresponding to the pull request number (only if `pull-request-cache` is set)
+- Other events
+  - Export nothing
 
-It always imports a cache of the default branch.
+It imports a cache on the following events:
+
+- `push` event to a branch
+  - Import a cache from the tag corresponding to the pushed branch
+- `pull_request` event
+  - Import a cache from the tag corresponding to the pull request number
+  - Import a cache from the tag corresponding to the base branch
+  - Import a cache from the tag corresponding to the default branch
+- `issue_comment` event to a pull request
+  - Import a cache from the tag corresponding to the pull request number
+  - Import a cache from the tag corresponding to the base branch
+  - Import a cache from the tag corresponding to the default branch
+- Other events
+  - Import a cache from the tag corresponding to the default branch
