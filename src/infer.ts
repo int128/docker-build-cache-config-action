@@ -16,12 +16,14 @@ export const inferImageTags = async (octokit: Octokit, context: Context, inputs:
   const flavor = parseFlavor(inputs.flavor)
   const keys = await inferCacheKeys(octokit, context, inputs)
   return {
-    from: keys.from.map((from) => `${inputs.image}:${escape(`${flavor.prefix}${from}${flavor.suffix}`)}`),
-    to: keys.to.map((to) => `${inputs.image}:${escape(`${flavor.prefix}${to}${flavor.suffix}`)}`),
+    from: unique(keys.from.map((from) => `${inputs.image}:${escape(`${flavor.prefix}${from}${flavor.suffix}`)}`)),
+    to: unique(keys.to.map((to) => `${inputs.image}:${escape(`${flavor.prefix}${to}${flavor.suffix}`)}`)),
   }
 }
 
 const escape = (s: string) => s.replace(/[/]/, '-')
+
+const unique = <T>(a: T[]) => [...new Set(a)]
 
 const parseFlavor = (flavor: string[]) => {
   let prefix = ''
@@ -65,49 +67,38 @@ const inferIssueCommentBranch = async (octokit: Octokit, context: Context, input
     }
   }
 
-  const pull = await octokit.rest.pulls.get({
+  const { data: pull } = await octokit.rest.pulls.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: context.issue.number,
   })
-
-  return inferPullRequestData(
-    {
-      ref: pull.data.base.ref,
-      number: pull.data.number,
-    },
-    inputs,
-  )
+  return inferPullRequestData(pull, inputs)
 }
 
 const inferPullRequestBranch = (context: Context, inputs: Inputs): Cache => {
   const payload = context.payload as PullRequestEvent
-  return inferPullRequestData(
-    {
-      ref: payload.pull_request.base.ref,
-      number: payload.pull_request.number,
-    },
-    inputs,
-  )
+  return inferPullRequestData(payload.pull_request, inputs)
 }
 
-type PullRequestData = {
-  ref: PullRequestEvent['pull_request']['base']['ref']
-  number: PullRequestEvent['pull_request']['number']
+type PullRequest = {
+  base: {
+    ref: string
+    repo: { default_branch: string }
+  }
+  number: number
 }
 
-const inferPullRequestData = ({ ref, number }: PullRequestData, inputs: Inputs): Cache => {
+const inferPullRequestData = (pull: PullRequest, inputs: Inputs): Cache => {
   if (!inputs.pullRequestCache) {
     return {
-      from: [ref],
+      from: [pull.base.ref, pull.base.repo.default_branch],
       to: [],
     }
   }
 
-  const pullRequestCache = `pr-${number}`
-
+  const pullRequestCache = `pr-${pull.number}`
   return {
-    from: [pullRequestCache, ref],
+    from: [pullRequestCache, pull.base.ref, pull.base.repo.default_branch],
     to: [pullRequestCache],
   }
 }

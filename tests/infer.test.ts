@@ -42,11 +42,68 @@ test.each([
           number: 123,
           base: {
             ref: 'main',
+            repo: { default_branch: 'main' },
           },
         },
       },
       repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
+      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
+    },
+    inputs,
+  )
+  expect(tags).toStrictEqual(expected)
+})
+
+test.each([
+  {
+    description: 'default',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      token: '',
+      pullRequestCache: false,
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:yet-another-base', 'ghcr.io/int128/sandbox/cache:main'],
+      to: [],
+    },
+  },
+  {
+    description: 'pull-request-cache',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      token: '',
+      pullRequestCache: true,
+    },
+    expected: {
+      from: [
+        'ghcr.io/int128/sandbox/cache:pr-123',
+        'ghcr.io/int128/sandbox/cache:yet-another-base',
+        'ghcr.io/int128/sandbox/cache:main',
+      ],
+      to: ['ghcr.io/int128/sandbox/cache:pr-123'],
+    },
+  },
+])('on pull_request to non-default branch with $description', async ({ inputs, expected }) => {
+  const fetch = fetchMock.sandbox()
+  const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
+  const tags = await inferImageTags(
+    octokit,
+    {
+      eventName: 'pull_request',
+      ref: 'refs/pulls/123/merge',
+      payload: {
+        pull_request: {
+          number: 123,
+          base: {
+            ref: 'yet-another-base',
+            repo: { default_branch: 'main' },
+          },
+        },
+      },
+      repo: { owner: 'int128', repo: 'sandbox' },
+      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
     },
     inputs,
   )
@@ -84,6 +141,7 @@ test.each([
   const fetch = fetchMock.sandbox().getOnce('https://api.github.com/repos/int128/sandbox/pulls/123', {
     base: {
       ref: 'main',
+      repo: { default_branch: 'main' },
     },
     number: 123,
   })

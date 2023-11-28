@@ -39,6 +39,7 @@ describe('Basic usage', () => {
           pull_request: {
             base: {
               ref: 'main',
+              repo: { default_branch: 'main' },
             },
             number: 1,
           },
@@ -58,6 +59,7 @@ describe('Basic usage', () => {
     const fetch = fetchMock.sandbox().getOnce('https://api.github.com/repos/int128/sandbox/pulls/1', {
       base: {
         ref: 'main',
+        repo: { default_branch: 'main' },
       },
       number: 1,
     })
@@ -128,6 +130,7 @@ describe('Import and export a pull request cache', () => {
           pull_request: {
             base: {
               ref: 'main',
+              repo: { default_branch: 'main' },
             },
             number: 1,
           },
