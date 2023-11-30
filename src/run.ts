@@ -23,6 +23,8 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
     image: inputs.image,
     flavor: inputs.flavor,
     pullRequestCache: inputs.pullRequestCache,
+    cacheKey: [], // TODO
+    cacheKeyFallback: [], // TODO
   })
   core.info(`Inferred cache-from: ${tags.from.join(', ')}`)
   core.info(`Inferred cache-to: ${tags.to.join(', ')}`)
