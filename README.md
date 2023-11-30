@@ -390,7 +390,7 @@ ghcr.io/${{ github.repository }}/cache:staging
 | `extra-cache-to`     | -          | Extra flag to `cache-to`                |
 | `pull-request-cache` | -          | Import and export a pull request cache  |
 | `cache-key`          | -          | Cache key                               |
-| `cache-key-fallback` | -          | Cache key fallback                      |
+| `cache-key-fallback` | -          | Cache key to fallback                   |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.

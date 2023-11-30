@@ -18,6 +18,12 @@ inputs:
     description: Import and export a pull request cache
     required: false
     default: 'false'
+  cache-key:
+    description: Cache key
+    required: false
+  cache-key-fallback:
+    description: Cache key to fallback
+    required: false
   token:
     description: GitHub token
     required: false

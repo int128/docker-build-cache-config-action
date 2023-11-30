@@ -116,6 +116,13 @@ const inferPullRequestData = (pull: PullRequest, inputs: Inputs): Cache => {
     }
   }
 
+  if (inputs.cacheKey.length > 0) {
+    return {
+      from: [...inputs.cacheKey, ...inputs.cacheKeyFallback],
+      to: inputs.cacheKey,
+    }
+  }
+
   const pullRequestKey = `pr-${pull.number}`
   if (inputs.cacheKeyFallback.length > 0) {
     return {

@@ -31,6 +31,52 @@ test.each([
       to: ['ghcr.io/int128/sandbox/cache:pr-123'],
     },
   },
+  {
+    description: 'cache-key-fallback',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: false,
+      cacheKey: [],
+      cacheKeyFallback: ['development'],
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:development'],
+      to: [],
+    },
+  },
+  {
+    description: 'pull-request-cache and cache-key-fallback',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: true,
+      cacheKey: [],
+      cacheKeyFallback: ['development'],
+    },
+    expected: {
+      from: [
+        'ghcr.io/int128/sandbox/cache:pr-123',
+        'ghcr.io/int128/sandbox/cache:main',
+        'ghcr.io/int128/sandbox/cache:development',
+      ],
+      to: ['ghcr.io/int128/sandbox/cache:pr-123'],
+    },
+  },
+  {
+    description: 'pull-request-cache, cache-key and cache-key-fallback',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: true,
+      cacheKey: ['pull-request-123'],
+      cacheKeyFallback: ['development'],
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:pull-request-123', 'ghcr.io/int128/sandbox/cache:development'],
+      to: ['ghcr.io/int128/sandbox/cache:pull-request-123'],
+    },
+  },
 ])('on pull_request with $description', async ({ inputs, expected }) => {
   const fetch = fetchMock.sandbox()
   const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
@@ -186,6 +232,20 @@ test.each([
     expected: {
       from: ['ghcr.io/int128/sandbox/cache:main'],
       to: ['ghcr.io/int128/sandbox/cache:main'],
+    },
+  },
+  {
+    description: 'cache-key',
+    inputs: {
+      image: 'ghcr.io/int128/sandbox/cache',
+      flavor: [],
+      pullRequestCache: false,
+      cacheKey: ['development'],
+      cacheKeyFallback: [],
+    },
+    expected: {
+      from: ['ghcr.io/int128/sandbox/cache:development'],
+      to: ['ghcr.io/int128/sandbox/cache:development'],
     },
   },
   {
