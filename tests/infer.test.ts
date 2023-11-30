@@ -8,7 +8,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
@@ -21,7 +20,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: true,
     },
     expected: {
@@ -60,7 +58,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
@@ -73,7 +70,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: true,
     },
     expected: {
@@ -116,7 +112,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
@@ -129,7 +124,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
-      token: '',
       pullRequestCache: true,
     },
     expected: {
@@ -185,7 +179,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: ['prefix=frontend--'],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
@@ -198,7 +191,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: ['suffix=-arm64'],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
@@ -211,7 +203,6 @@ test.each([
     inputs: {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: ['prefix=frontend--,suffix=-arm64'],
-      token: '',
       pullRequestCache: false,
     },
     expected: {
