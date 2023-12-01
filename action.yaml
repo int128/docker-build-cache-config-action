@@ -19,10 +19,10 @@ inputs:
     required: false
     default: 'false'
   cache-key:
-    description: Cache key
+    description: Custom cache key (experimental)
     required: false
   cache-key-fallback:
-    description: Cache key to fallback
+    description: Custom cache key to fallback (experimental)
     required: false
   token:
     description: GitHub token

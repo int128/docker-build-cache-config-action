@@ -389,15 +389,16 @@ ghcr.io/${{ github.repository }}/cache:staging
 | `extra-cache-from`   | -          | Extra flag to `cache-from`              |
 | `extra-cache-to`     | -          | Extra flag to `cache-to`                |
 | `pull-request-cache` | -          | Import and export a pull request cache  |
-| `cache-key`          | -          | Cache key                               |
-| `cache-key-fallback` | -          | Cache key to fallback                   |
+| `cache-key`          | -          | Custom cache key                        |
+| `cache-key-fallback` | -          | Custom cache key to fallback            |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
 
 `extra-cache-to` is added to `cache-to` parameter only when it needs to export cache.
 
-If `cache-key` is not set, it is inferred from the branch name or pull request number, e.g., `main` or `pr-1`.
+Note that `cache-key` and `cache-key-fallback` are experimental.
+The specification may change in the future.
 
 ### Outputs
 
