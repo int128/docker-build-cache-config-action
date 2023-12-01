@@ -117,6 +117,8 @@ const inferPullRequestData = (pull: PullRequest, inputs: Inputs): Cache => {
   }
 
   if (inputs.cacheKey.length > 0) {
+    // When cache-key is given, an image tag does not correspond to a branch name.
+    // Do not fallback to the base branch.
     return {
       from: [...inputs.cacheKey, ...inputs.cacheKeyFallback],
       to: inputs.cacheKey,
