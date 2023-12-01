@@ -356,28 +356,26 @@ jobs:
       - uses: int128/docker-build-cache-config-action@v1
         id: cache
         with:
-          image: ghcr.io/${{ github.repository }}
-          flavor: suffix=-${{ matrix.environment }}-cache
+          image: ghcr.io/${{ github.repository }}/cache
+          cache-key: ${{ matrix.environment }}
+          cache-key-fallback: development
       - uses: docker/build-push-action@v2
         id: build
         with:
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          # Always fallback to the cache of development environment
-          cache-from: |
-            ${{ steps.cache.outputs.cache-from }}
-            type=registry,ref=ghcr.io/${{ github.repository }}:main-development-cache
+          cache-from: ${{ steps.cache.outputs.cache-from }}
           cache-to: ${{ steps.cache.outputs.cache-to }}
 ```
 
 It will create the following image tags:
 
 ```
-ghcr.io/${{ github.repository }}:main-development
-ghcr.io/${{ github.repository }}:main-development-cache
-ghcr.io/${{ github.repository }}:main-staging
-ghcr.io/${{ github.repository }}:main-staging-cache
+ghcr.io/${{ github.repository }}:development
+ghcr.io/${{ github.repository }}:staging
+ghcr.io/${{ github.repository }}/cache:development
+ghcr.io/${{ github.repository }}/cache:staging
 ```
 
 ## Specification
@@ -391,11 +389,16 @@ ghcr.io/${{ github.repository }}:main-staging-cache
 | `extra-cache-from`   | -          | Extra flag to `cache-from`              |
 | `extra-cache-to`     | -          | Extra flag to `cache-to`                |
 | `pull-request-cache` | -          | Import and export a pull request cache  |
+| `cache-key`          | -          | Custom cache key                        |
+| `cache-key-fallback` | -          | Custom cache key to fallback            |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
 
 `extra-cache-to` is added to `cache-to` parameter only when it needs to export cache.
+
+Note that `cache-key` and `cache-key-fallback` are experimental.
+The specification may change in the future.
 
 ### Outputs
 
