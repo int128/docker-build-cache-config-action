@@ -23,7 +23,7 @@ export const inferImageTags = async (octokit: Octokit, context: Context, inputs:
   }
 }
 
-const escape = (s: string) => s.replace(/[/]/, '-')
+const escape = (s: string) => s.replaceAll(/[/]/g, '-')
 
 const unique = <T>(a: T[]) => [...new Set(a)]
 
