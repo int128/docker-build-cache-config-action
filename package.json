@@ -11,7 +11,7 @@
     "@actions/github": "6.0.0"
   },
   "devDependencies": {
-    "@octokit/webhooks-types": "7.4.0",
+    "@octokit/webhooks-types": "7.5.0",
     "@tsconfig/node20": "20.1.4",
     "@types/jest": "29.5.12",
     "@types/node": "20.12.2",
