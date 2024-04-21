@@ -1,4 +1,4 @@
-import { generateDockerFlags } from '../src/docker'
+import { generateDockerFlags } from '../src/docker.js'
 
 test('both from and to', () => {
   const outputs = generateDockerFlags({

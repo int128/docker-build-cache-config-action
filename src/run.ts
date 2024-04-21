@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import { Context, Octokit } from './github'
-import { inferImageTags } from './infer'
-import { generateDockerFlags } from './docker'
+import { Context, Octokit } from './github.js'
+import { inferImageTags } from './infer.js'
+import { generateDockerFlags } from './docker.js'
 
 type Inputs = {
   image: string

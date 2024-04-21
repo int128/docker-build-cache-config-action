@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock'
 import { getOctokit } from '@actions/github'
-import { inferImageTags } from '../src/infer'
+import { inferImageTags } from '../src/infer.js'
 
 test.each([
   {
