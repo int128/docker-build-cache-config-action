@@ -1,5 +1,5 @@
 import fetchMock from 'fetch-mock'
-import { run } from '../src/run'
+import { run } from '../src/run.js'
 import { getOctokit } from '@actions/github'
 
 describe('Basic usage', () => {

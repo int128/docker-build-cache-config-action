@@ -1,5 +1,5 @@
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
-import { Context, Octokit } from './github'
+import { Context, Octokit } from './github.js'
 
 type Inputs = {
   image: string

@@ -1,7 +1,6 @@
-import * as context from '@actions/github/lib/context'
-import { GitHub } from '@actions/github/lib/utils'
+import * as github from '@actions/github'
 
-export type Octokit = InstanceType<typeof GitHub>
+export type Octokit = ReturnType<typeof github.getOctokit>
 
 // For testability, use a subset of github.context in this module.
-export type Context = Pick<context.Context, 'eventName' | 'ref' | 'payload' | 'repo' | 'issue'>
+export type Context = Pick<typeof github.context, 'eventName' | 'ref' | 'payload' | 'repo' | 'issue'>
