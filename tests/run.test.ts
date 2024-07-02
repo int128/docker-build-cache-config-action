@@ -6,6 +6,7 @@ describe('Basic usage', () => {
   test('push event of main branch', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -30,6 +31,7 @@ describe('Basic usage', () => {
   test('pull_request event', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -70,6 +72,7 @@ describe('Basic usage', () => {
     const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -101,6 +104,7 @@ describe('Basic usage', () => {
   test('schedule event', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -127,6 +131,7 @@ describe('Import and export a pull request cache', () => {
   test('pull_request event', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: true,
       extraCacheFrom: '',
@@ -163,6 +168,7 @@ describe('Build multi-architecture images', () => {
   test('push event of main branch', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: ['suffix=-arm64'],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -189,6 +195,7 @@ describe('For Amazon ECR', () => {
   test('push event of main branch', async () => {
     const outputs = await run({
       image: '123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox',
+      cacheType: 'registry',
       flavor: ['suffix=-cache'],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -216,6 +223,7 @@ describe('Build multiple image tags from a branch', () => {
   test('push event of main branch', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -240,6 +248,7 @@ describe('Build multiple image tags from a branch', () => {
   test('pull_request event', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',
@@ -272,6 +281,7 @@ describe('Build multiple image tags from a branch', () => {
   test('schedule event', async () => {
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
+      cacheType: 'registry',
       flavor: [],
       pullRequestCache: false,
       extraCacheFrom: '',

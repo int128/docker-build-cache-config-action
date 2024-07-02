@@ -2,6 +2,7 @@ import { generateDockerFlags } from '../src/docker.js'
 
 test('both from and to', () => {
   const outputs = generateDockerFlags({
+    cacheType: 'registry',
     cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     cacheToImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     extraCacheFrom: '',
@@ -15,6 +16,7 @@ test('both from and to', () => {
 
 test('only from', () => {
   const outputs = generateDockerFlags({
+    cacheType: 'registry',
     cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     cacheToImageTag: [],
     extraCacheFrom: '',
@@ -28,6 +30,7 @@ test('only from', () => {
 
 test('both from and to with extra args', () => {
   const outputs = generateDockerFlags({
+    cacheType: 'registry',
     cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     cacheToImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     extraCacheFrom: 'foo=bar',
@@ -41,6 +44,7 @@ test('both from and to with extra args', () => {
 
 test('only from with extra args', () => {
   const outputs = generateDockerFlags({
+    cacheType: 'registry',
     cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:main'],
     cacheToImageTag: [],
     extraCacheFrom: 'foo=bar',
@@ -54,6 +58,7 @@ test('only from with extra args', () => {
 
 test('both multiple from and to', () => {
   const outputs = generateDockerFlags({
+    cacheType: 'registry',
     cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:pr-1', 'ghcr.io/int128/sandbox/cache:main'],
     cacheToImageTag: ['ghcr.io/int128/sandbox/cache:pr-1'],
     extraCacheFrom: '',
@@ -65,5 +70,20 @@ test('both multiple from and to', () => {
       '\n' +
       'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
     cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max',
+  })
+})
+
+test('cache type', () => {
+  const outputs = generateDockerFlags({
+    cacheType: 'gha',
+    cacheFromImageTag: ['ghcr.io/int128/sandbox/cache:pr-1', 'ghcr.io/int128/sandbox/cache:main'],
+    cacheToImageTag: ['ghcr.io/int128/sandbox/cache:pr-1'],
+    extraCacheFrom: '',
+    extraCacheTo: '',
+  })
+  expect(outputs).toStrictEqual({
+    cacheFrom:
+      'type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1' + '\n' + 'type=gha,ref=ghcr.io/int128/sandbox/cache:main',
+    cacheTo: 'type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max',
   })
 })

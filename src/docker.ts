@@ -1,4 +1,7 @@
+export type CacheType = 'registry' | 'local' | 'inline' | 'gha' | 's3'
+
 type Inputs = {
+  cacheType: CacheType
   cacheFromImageTag: string[]
   cacheToImageTag: string[]
   extraCacheFrom: string
@@ -11,8 +14,10 @@ type Outputs = {
 }
 
 export const generateDockerFlags = (inputs: Inputs): Outputs => {
+  const cacheType = `type=${inputs.cacheType}`
+
   const cacheFrom = inputs.cacheFromImageTag.map((tag) => {
-    const cacheFrom = ['type=registry', `ref=${tag}`]
+    const cacheFrom = [cacheType, `ref=${tag}`]
     if (inputs.extraCacheFrom) {
       cacheFrom.push(inputs.extraCacheFrom)
     }
@@ -21,7 +26,7 @@ export const generateDockerFlags = (inputs: Inputs): Outputs => {
 
   const cacheTo = inputs.cacheToImageTag.map((tag) => {
     const cacheTo = []
-    cacheTo.push('type=registry', `ref=${tag}`, 'mode=max')
+    cacheTo.push(cacheType, `ref=${tag}`, 'mode=max')
     if (inputs.extraCacheTo) {
       cacheTo.push(inputs.extraCacheTo)
     }

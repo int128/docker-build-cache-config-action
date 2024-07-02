@@ -378,19 +378,74 @@ ghcr.io/${{ github.repository }}/cache:development
 ghcr.io/${{ github.repository }}/cache:staging
 ```
 
+### Specify cache backend type
+
+To ensure fast builds, BuildKit automatically caches the build result in its own internal cache. Additionally, BuildKit also supports exporting build cache to an external location, making it possible to import in future builds.
+
+Ref: https://docs.docker.com/build/cache/backends/
+
+You can set the `cache-type` to configure the backend to use.
+
+```yaml
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+    cache-type: inline # cache backend storage
+```
+
+Will generate the following outputs
+
+```yaml
+cache-from: |
+  type=inline,ref=REGISTRY/REPOSITORY:pr-1
+  type=inline,ref=REGISTRY/REPOSITORY:main
+cache-to: type=inline,ref=REGISTRY/REPOSITORY:pr-1,mode=max
+```
+
+#### Use GitHub Actions cache backend
+
+> The GitHub Actions cache utilizes the GitHub-provided Action's cache or other cache services supporting the GitHub Actions cache protocol. This is the recommended cache to use inside your GitHub Actions workflows, as long as your use case falls within the size and usage limits set by GitHub.
+> ⚠ This is an experimental feature. The interface and behavior are unstable and may change in future releases.
+
+Ref: https://docs.docker.com/build/cache/backends/gha/
+
+You can set the cache type to `gha` to use the GitHub Actions cache.
+
+```yaml
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+    cache-type: gha
+- uses: docker/build-push-action@v2
+  id: build
+  with:
+    push: true
+    tags: ${{ steps.metadata.outputs.tags }}
+    labels: ${{ steps.metadata.outputs.labels }}
+    cache-from: ${{ steps.cache.outputs.cache-from }}
+    cache-to: ${{ steps.cache.outputs.cache-to }}
+```
+
 ## Specification
 
 ### Inputs
 
-| Name                 | Default    | Description                             |
-| -------------------- | ---------- | --------------------------------------- |
-| `image`              | (required) | Image repository to import/export cache |
-| `flavor`             | -          | Flavor (multiline string)               |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`              |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                |
-| `pull-request-cache` | -          | Import and export a pull request cache  |
-| `cache-key`          | -          | Custom cache key                        |
-| `cache-key-fallback` | -          | Custom cache key to fallback            |
+| Name                 | Default    | Description                                                                                    |
+| -------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `image`              | (required) | Image repository to import/export cache                                                        |
+| `cache-type`         | `registry` | Type of cache backend (for source and destination). Can be registry, local, inline, gha and s3 |
+| `flavor`             | -          | Flavor (multiline string)                                                                      |
+| `extra-cache-from`   | -          | Extra flag to `cache-from`                                                                     |
+| `extra-cache-to`     | -          | Extra flag to `cache-to`                                                                       |
+| `pull-request-cache` | -          | Import and export a pull request cache                                                         |
+| `cache-key`          | -          | Custom cache key                                                                               |
+| `cache-key-fallback` | -          | Custom cache key to fallback                                                                   |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.

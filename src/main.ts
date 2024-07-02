@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { run } from './run.js'
+import { CacheType } from './docker.js'
 
 const main = async (): Promise<void> => {
   if (core.getInput('tag-prefix')) {
@@ -12,6 +13,7 @@ const main = async (): Promise<void> => {
 
   const outputs = await run({
     image: core.getInput('image', { required: true }),
+    cacheType: core.getInput('cache-type', { required: true }) as CacheType,
     flavor: core.getMultilineInput('flavor'),
     pullRequestCache: core.getBooleanInput('pull-request-cache'),
     cacheKey: core.getMultilineInput('cache-key'),
