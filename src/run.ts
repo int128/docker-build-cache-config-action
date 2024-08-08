@@ -1,10 +1,11 @@
 import * as core from '@actions/core'
 import { Context, Octokit } from './github.js'
 import { inferImageTags } from './infer.js'
-import { generateDockerFlags } from './docker.js'
+import { CacheType, generateDockerFlags } from './docker.js'
 
 type Inputs = {
   image: string
+  cacheType: CacheType
   flavor: string[]
   pullRequestCache: boolean
   cacheKey: string[]
@@ -31,6 +32,7 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
   core.info(`Inferred cache-from: ${tags.from.join(', ')}`)
   core.info(`Inferred cache-to: ${tags.to.join(', ')}`)
   return generateDockerFlags({
+    cacheType: inputs.cacheType,
     cacheFromImageTag: tags.from,
     cacheToImageTag: tags.to,
     extraCacheFrom: inputs.extraCacheFrom,
