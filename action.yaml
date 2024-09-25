@@ -5,6 +5,10 @@ inputs:
   image:
     description: Image repository to import/export cache
     required: true
+  cache-type:
+    description: Type of cache backend (for source and destination). Can be registry, local, inline, gha and s3.
+    required: true
+    default: 'registry'
   flavor:
     description: Flavor (multiline string)
     required: false
