@@ -1,6 +1,9 @@
-import fetchMock from 'fetch-mock'
 import { run } from '../src/run.js'
-import { getOctokit } from '@actions/github'
+import { getOctokit, server } from './github.js'
+
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
 describe('Basic usage', () => {
   test('push event of main branch', async () => {
@@ -20,7 +23,7 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -53,7 +56,7 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -62,14 +65,6 @@ describe('Basic usage', () => {
   })
 
   test('issue_comment event', async () => {
-    const fetch = fetchMock.sandbox().getOnce('https://api.github.com/repos/int128/sandbox/pulls/1', {
-      base: {
-        ref: 'main',
-        repo: { default_branch: 'main' },
-      },
-      number: 1,
-    })
-    const octokit = getOctokit('GITHUB_TOKEN', { request: { fetch } })
     const outputs = await run({
       image: 'ghcr.io/int128/sandbox/cache',
       cacheType: 'registry',
@@ -93,7 +88,7 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      octokit,
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -118,7 +113,7 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
@@ -153,7 +148,7 @@ describe('Import and export a pull request cache', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: `\
@@ -182,7 +177,7 @@ describe('Build multi-architecture images', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main-arm64',
@@ -209,7 +204,7 @@ describe('For Amazon ECR', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox:main-cache',
@@ -237,7 +232,7 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:staging',
@@ -270,7 +265,7 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:development',
@@ -295,7 +290,7 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
-      octokit: getOctokit('GITHUB_TOKEN'),
+      octokit: getOctokit(),
     })
     expect(outputs).toStrictEqual({
       cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:development',
