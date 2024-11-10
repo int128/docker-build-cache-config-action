@@ -40,8 +40,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0(@types/node@20.17.6)
       msw:
-        specifier: 2.6.2
-        version: 2.6.2(@types/node@20.17.6)(typescript@5.6.3)
+        specifier: 2.6.3
+        version: 2.6.3(@types/node@20.17.6)(typescript@5.6.3)
       prettier:
         specifier: 3.3.3
         version: 3.3.3
@@ -1400,8 +1400,8 @@ packages:
   ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
-  msw@2.6.2:
-    resolution: {integrity: sha512-RdRgPvjfuzMIACkWv7VOVAeSRYMU3ofokLv1w0RsbFX960qnj/tFEyOFXY0G2GTUd9trA6rHuHciM/FKpBp6/A==}
+  msw@2.6.3:
+    resolution: {integrity: sha512-+8fGdyFl3tjEZSKavuKp9BaVCLFmN/4D0m4qAPOd25/J6MjeaW2qBkZvWliLTp/i6cYthEmMtJjki/wLBrYCTA==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -3537,7 +3537,7 @@ snapshots:
 
   ms@2.1.2: {}
 
-  msw@2.6.2(@types/node@20.17.6)(typescript@5.6.3):
+  msw@2.6.3(@types/node@20.17.6)(typescript@5.6.3):
     dependencies:
       '@bundled-es-modules/cookie': 2.0.1
       '@bundled-es-modules/statuses': 1.0.1
