@@ -136,6 +136,7 @@ Here is an example to build a container image with [docker/bake-action](https://
 ```
 
 ```hcl
+# docker-bake.hcl
 target "docker-metadata-action" {}
 
 target "docker-build-cache-config-action" {}
