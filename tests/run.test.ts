@@ -23,12 +23,11 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-      cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main')
+    expect(outputs.cacheTo).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max')
   })
 
   test('pull_request event', async () => {
@@ -56,12 +55,11 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-      cacheTo: '',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main')
+    expect(outputs.cacheTo).toBe('')
   })
 
   test('issue_comment event', async () => {
@@ -88,12 +86,11 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-      cacheTo: '',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main')
+    expect(outputs.cacheTo).toBe('')
   })
 
   test('schedule event', async () => {
@@ -113,12 +110,11 @@ describe('Basic usage', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-      cacheTo: '',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main')
+    expect(outputs.cacheTo).toBe('')
   })
 })
 
@@ -148,14 +144,13 @@ describe('Import and export a pull request cache', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: `\
+    expect(outputs.cacheFrom).toBe(`\
 type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1
-type=registry,ref=ghcr.io/int128/sandbox/cache:main`,
-      cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max',
-    })
+type=registry,ref=ghcr.io/int128/sandbox/cache:main`)
+    expect(outputs.cacheTo).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max')
   })
 })
 
@@ -177,12 +172,11 @@ describe('Build multi-architecture images', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main-arm64',
-      cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main-arm64,mode=max',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main-arm64')
+    expect(outputs.cacheTo).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:main-arm64,mode=max')
   })
 })
 
@@ -204,13 +198,15 @@ describe('For Amazon ECR', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox:main-cache',
-      cacheTo:
-        'type=registry,ref=123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox:main-cache,mode=max,image-manifest=true',
-    })
+    expect(outputs.cacheFrom).toBe(
+      'type=registry,ref=123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox:main-cache',
+    )
+    expect(outputs.cacheTo).toBe(
+      'type=registry,ref=123456789012.dkr.ecr.us-west-2.amazonaws.com/int128/sandbox:main-cache,mode=max,image-manifest=true',
+    )
   })
 })
 
@@ -232,12 +228,11 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:staging',
-      cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:staging,mode=max',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:staging')
+    expect(outputs.cacheTo).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:staging,mode=max')
   })
 
   test('pull_request event', async () => {
@@ -265,12 +260,11 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 1 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:development',
-      cacheTo: '',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:development')
+    expect(outputs.cacheTo).toBe('')
   })
 
   test('schedule event', async () => {
@@ -290,11 +284,10 @@ describe('Build multiple image tags from a branch', () => {
         repo: { owner: 'int128', repo: 'sandbox' },
         issue: { owner: 'int128', repo: 'sandbox', number: 0 },
       },
+      bakeTarget: 'docker-build-cache-config-action',
       octokit: getOctokit(),
     })
-    expect(outputs).toStrictEqual({
-      cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:development',
-      cacheTo: '',
-    })
+    expect(outputs.cacheFrom).toBe('type=registry,ref=ghcr.io/int128/sandbox/cache:development')
+    expect(outputs.cacheTo).toBe('')
   })
 })
