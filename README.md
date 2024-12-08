@@ -135,6 +135,17 @@ Here is an example to build a container image with [docker/bake-action](https://
       ${{ steps.cache.outputs.bake-file }}
 ```
 
+```hcl
+target "docker-metadata-action" {}
+
+target "docker-build-cache-config-action" {}
+
+target "default" {
+  inherits = ["docker-metadata-action", "docker-build-cache-config-action"]
+  context = "."
+}
+```
+
 ## Specification
 
 ### Inputs
