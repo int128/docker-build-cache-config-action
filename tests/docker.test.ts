@@ -9,8 +9,8 @@ test('both from and to', () => {
     extraCacheTo: '',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-    cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max',
+    cacheFrom: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main'],
+    cacheTo: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max'],
   })
 })
 
@@ -23,8 +23,8 @@ test('only from', () => {
     extraCacheTo: '',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-    cacheTo: '',
+    cacheFrom: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main'],
+    cacheTo: [],
   })
 })
 
@@ -37,8 +37,8 @@ test('both from and to with extra args', () => {
     extraCacheTo: 'image-manifest=true',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main,foo=bar',
-    cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max,image-manifest=true',
+    cacheFrom: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main,foo=bar'],
+    cacheTo: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main,mode=max,image-manifest=true'],
   })
 })
 
@@ -51,8 +51,8 @@ test('only from with extra args', () => {
     extraCacheTo: 'image-manifest=true',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom: 'type=registry,ref=ghcr.io/int128/sandbox/cache:main,foo=bar',
-    cacheTo: '',
+    cacheFrom: ['type=registry,ref=ghcr.io/int128/sandbox/cache:main,foo=bar'],
+    cacheTo: [],
   })
 })
 
@@ -65,11 +65,11 @@ test('both multiple from and to', () => {
     extraCacheTo: '',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom:
-      'type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1' +
-      '\n' +
+    cacheFrom: [
+      'type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1',
       'type=registry,ref=ghcr.io/int128/sandbox/cache:main',
-    cacheTo: 'type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max',
+    ],
+    cacheTo: ['type=registry,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max'],
   })
 })
 
@@ -82,8 +82,7 @@ test('cache type', () => {
     extraCacheTo: '',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom:
-      'type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1' + '\n' + 'type=gha,ref=ghcr.io/int128/sandbox/cache:main',
-    cacheTo: 'type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max',
+    cacheFrom: ['type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1', 'type=gha,ref=ghcr.io/int128/sandbox/cache:main'],
+    cacheTo: ['type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max'],
   })
 })

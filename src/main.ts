@@ -20,12 +20,16 @@ const main = async (): Promise<void> => {
     cacheKeyFallback: core.getMultilineInput('cache-key-fallback'),
     extraCacheFrom: core.getInput('extra-cache-from'),
     extraCacheTo: core.getInput('extra-cache-to'),
+    bakeTarget: core.getInput('bake-target', { required: true }),
     context: github.context,
     octokit: github.getOctokit(core.getInput('token', { required: true })),
   })
-  core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
+  core.startGroup('Outputs')
+  core.info(JSON.stringify(outputs, undefined, 2))
+  core.endGroup()
   core.setOutput('cache-from', outputs.cacheFrom)
   core.setOutput('cache-to', outputs.cacheTo)
+  core.setOutput('bake-file', outputs.bakeFile)
 }
 
 main().catch((e: Error) => {
