@@ -61,7 +61,7 @@ jobs:
           workdir: tests/fixture
           push: ${{ github.event_name == 'push' }}
           files: |
-            docker-bake.hcl
+            ./docker-bake.hcl
             ${{ steps.metadata.outputs.bake-file }}
             ${{ steps.cache.outputs.bake-file }}
 

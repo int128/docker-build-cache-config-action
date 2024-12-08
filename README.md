@@ -79,7 +79,9 @@ This action generates the cache parameters by this strategy.
 
 ## Examples
 
-Here is an example to store a cache into GHCR (GitHub Container Registry).
+### Build with docker/build-push-action
+
+Here is an example to build a container image with [docker/build-push-action](https://github.com/docker/build-push-action).
 
 ```yaml
 - uses: docker/metadata-action@v3
@@ -110,20 +112,44 @@ ghcr.io/${{ github.repository }}/cache:main
 
 See [README_EXAMPLES.md](README_EXAMPLES.md) for more examples.
 
+### Build with docker/bake-action
+
+Here is an example to build a container image with [docker/bake-action](https://github.com/docker/bake-action).
+
+```yaml
+- uses: docker/metadata-action@v3
+  id: metadata
+  with:
+    images: ghcr.io/${{ github.repository }}
+- uses: int128/docker-build-cache-config-action@v1
+  id: cache
+  with:
+    image: ghcr.io/${{ github.repository }}/cache
+- uses: docker/bake-action@v5
+  id: build
+  with:
+    push: true
+    files: |
+      ./docker-bake.hcl
+      ${{ steps.metadata.outputs.bake-file }}
+      ${{ steps.cache.outputs.bake-file }}
+```
+
 ## Specification
 
 ### Inputs
 
-| Name                 | Default    | Description                                                                                    |
-| -------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| `image`              | (required) | Image repository to import/export cache                                                        |
-| `cache-type`         | `registry` | Type of cache backend (for source and destination). Can be registry, local, inline, gha and s3 |
-| `flavor`             | -          | Flavor (multiline string)                                                                      |
-| `extra-cache-from`   | -          | Extra flag to `cache-from`                                                                     |
-| `extra-cache-to`     | -          | Extra flag to `cache-to`                                                                       |
-| `pull-request-cache` | -          | Import and export a pull request cache                                                         |
-| `cache-key`          | -          | Custom cache key                                                                               |
-| `cache-key-fallback` | -          | Custom cache key to fallback                                                                   |
+| Name                 | Default                            | Description                                                                                    |
+| -------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `image`              | (required)                         | Image repository to import/export cache                                                        |
+| `cache-type`         | `registry`                         | Type of cache backend (for source and destination). Can be registry, local, inline, gha and s3 |
+| `flavor`             | -                                  | Flavor (multiline string)                                                                      |
+| `extra-cache-from`   | -                                  | Extra flag to `cache-from`                                                                     |
+| `extra-cache-to`     | -                                  | Extra flag to `cache-to`                                                                       |
+| `pull-request-cache` | -                                  | Import and export a pull request cache                                                         |
+| `cache-key`          | -                                  | Custom cache key                                                                               |
+| `cache-key-fallback` | -                                  | Custom cache key to fallback                                                                   |
+| `bake-target`        | `docker-build-cache-config-action` | Bake target name                                                                               |
 
 `flavor` is mostly compatible with [docker/metadata-action](https://github.com/docker/metadata-action#flavor-input)
 except this action supports only `prefix` and `suffix`.
@@ -139,6 +165,7 @@ The specification may change in the future.
 | ------------ | -------------------------------------- |
 | `cache-from` | Parameter for docker/build-push-action |
 | `cache-to`   | Parameter for docker/build-push-action |
+| `bake-file`  | Bake definition file                   |
 
 ### Events
 
