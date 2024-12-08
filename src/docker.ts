@@ -8,12 +8,12 @@ type Inputs = {
   extraCacheTo: string
 }
 
-type Outputs = {
-  cacheFrom: string
-  cacheTo: string
+export type DockerFlags = {
+  cacheFrom: string[]
+  cacheTo: string[]
 }
 
-export const generateDockerFlags = (inputs: Inputs): Outputs => {
+export const generateDockerFlags = (inputs: Inputs): DockerFlags => {
   const cacheType = `type=${inputs.cacheType}`
 
   const cacheFrom = inputs.cacheFromImageTag.map((tag) => {
@@ -34,7 +34,7 @@ export const generateDockerFlags = (inputs: Inputs): Outputs => {
   })
 
   return {
-    cacheFrom: cacheFrom.join('\n'),
-    cacheTo: cacheTo.join('\n'),
+    cacheFrom,
+    cacheTo,
   }
 }
