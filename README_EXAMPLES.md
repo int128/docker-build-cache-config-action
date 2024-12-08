@@ -10,6 +10,7 @@
   - [For monorepo](#for-monorepo)
   - [Build multiple image tags from a branch](#build-multiple-image-tags-from-a-branch)
 - [Cache backend type](#cache-backend-type)
+  - [Use GitHub Actions cache backend](#use-github-actions-cache-backend)
 
 ## Cache store
 
@@ -306,7 +307,7 @@ cache-from: |
 cache-to: type=inline,ref=REGISTRY/REPOSITORY:pr-1,mode=max
 ```
 
-#### Use GitHub Actions cache backend
+### Use GitHub Actions cache backend
 
 > The GitHub Actions cache utilizes the GitHub-provided Action's cache or other cache services supporting the GitHub Actions cache protocol. This is the recommended cache to use inside your GitHub Actions workflows, as long as your use case falls within the size and usage limits set by GitHub.
 > ⚠ This is an experimental feature. The interface and behavior are unstable and may change in future releases.
