@@ -24,9 +24,7 @@ const main = async (): Promise<void> => {
     context: github.context,
     octokit: github.getOctokit(core.getInput('token', { required: true })),
   })
-  core.startGroup('Outputs')
-  core.info(JSON.stringify(outputs, undefined, 2))
-  core.endGroup()
+  core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
   core.setOutput('cache-from', outputs.cacheFrom)
   core.setOutput('cache-to', outputs.cacheTo)
   core.setOutput('bake-file', outputs.bakeFile)
