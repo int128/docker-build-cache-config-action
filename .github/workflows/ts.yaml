@@ -56,7 +56,7 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           cache-from: ${{ steps.cache.outputs.cache-from }}
           cache-to: ${{ steps.cache.outputs.cache-to }}
-      - uses: docker/bake-action@4a9a8d494466d37134e2bfca2d3a8de8fb2681ad # v5.13.0
+      - uses: docker/bake-action@7bff531c65a5cda33e52e43950a795b91d450f63 # v6.3.0
         with:
           workdir: tests/fixture
           push: ${{ github.event_name == 'push' }}
