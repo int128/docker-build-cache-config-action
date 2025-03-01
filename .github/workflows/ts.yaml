@@ -58,8 +58,9 @@ jobs:
           cache-to: ${{ steps.cache.outputs.cache-to }}
       - uses: docker/bake-action@4ba453fbc2db7735392b93edf935aaf9b1e8f747 # v6.5.0
         with:
-          workdir: tests/fixture
           push: ${{ github.event_name == 'push' }}
+          workdir: tests/fixture
+          source: .
           files: |
             ./docker-bake.hcl
             ${{ steps.metadata.outputs.bake-file }}
