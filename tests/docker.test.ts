@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { generateDockerFlags } from '../src/docker.js'
 
 test('both from and to', () => {
