@@ -19,7 +19,7 @@
     "@vercel/ncc": "0.38.3",
     "@vitest/eslint-plugin": "1.2.1",
     "eslint": "9.28.0",
-    "msw": "2.10.1",
+    "msw": "2.10.2",
     "pnpm": "10.12.1",
     "prettier": "3.5.3",
     "typescript": "5.8.3",
