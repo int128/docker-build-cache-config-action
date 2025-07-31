@@ -15,9 +15,10 @@ export type DockerFlags = {
 
 export const generateDockerFlags = (inputs: Inputs): DockerFlags => {
   const cacheType = `type=${inputs.cacheType}`
+  const refKey = inputs.cacheType === 'gha' ? 'scope' : 'ref'
 
   const cacheFrom = inputs.cacheFromImageTag.map((tag) => {
-    const cacheFrom = [cacheType, `ref=${tag}`]
+    const cacheFrom = [cacheType, `${refKey}=${tag}`]
     if (inputs.extraCacheFrom) {
       cacheFrom.push(inputs.extraCacheFrom)
     }
@@ -26,7 +27,7 @@ export const generateDockerFlags = (inputs: Inputs): DockerFlags => {
 
   const cacheTo = inputs.cacheToImageTag.map((tag) => {
     const cacheTo = []
-    cacheTo.push(cacheType, `ref=${tag}`, 'mode=max')
+    cacheTo.push(cacheType, `${refKey}=${tag}`, 'mode=max')
     if (inputs.extraCacheTo) {
       cacheTo.push(inputs.extraCacheTo)
     }
