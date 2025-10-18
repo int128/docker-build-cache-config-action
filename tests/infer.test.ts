@@ -1,4 +1,4 @@
-import { expect, beforeAll, afterAll, afterEach, test } from 'vitest'
+import { afterAll, afterEach, beforeAll, expect, test } from 'vitest'
 import { inferImageTags } from '../src/infer.js'
 import { getOctokit, server } from './github.js'
 
