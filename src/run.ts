@@ -1,10 +1,10 @@
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 import * as core from '@actions/core'
-import * as fs from 'fs/promises'
-import * as path from 'path'
-import { Context, getRunnerTemp, Octokit } from './github.js'
-import { inferImageTags } from './infer.js'
-import { CacheType, generateDockerFlags } from './docker.js'
 import { generateBake } from './bake.js'
+import { type CacheType, generateDockerFlags } from './docker.js'
+import { type Context, getRunnerTemp, type Octokit } from './github.js'
+import { inferImageTags } from './infer.js'
 
 type Inputs = {
   image: string

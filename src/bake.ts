@@ -1,4 +1,4 @@
-import { DockerFlags } from './docker.js'
+import type { DockerFlags } from './docker.js'
 
 type Bake = {
   target: {

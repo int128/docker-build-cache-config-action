@@ -1,4 +1,4 @@
-import { describe, expect, beforeAll, afterAll, afterEach, test } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { run } from '../src/run.js'
 import { getOctokit, server } from './github.js'
 
