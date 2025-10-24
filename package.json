@@ -13,7 +13,7 @@
     "@biomejs/biome": "2.2.6",
     "@octokit/webhooks-types": "7.6.1",
     "@tsconfig/node20": "20.1.6",
-    "@types/node": "20.19.20",
+    "@types/node": "20.19.22",
     "@vercel/ncc": "0.38.4",
     "msw": "2.11.5",
     "pnpm": "10.17.1",
