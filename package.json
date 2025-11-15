@@ -18,7 +18,7 @@
     "msw": "2.11.6",
     "pnpm": "10.20.0",
     "typescript": "5.9.3",
-    "vitest": "4.0.6"
+    "vitest": "4.0.8"
   },
   "packageManager": "pnpm@10.20.0"
 }
