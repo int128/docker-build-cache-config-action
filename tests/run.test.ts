@@ -1,10 +1,10 @@
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
-import { run } from '../src/run.js'
-import { getOctokit, server } from './github.js'
-import { WebhookEvent } from '@octokit/webhooks-types'
 import * as fs from 'node:fs/promises'
 import * as os from 'node:os'
 import * as path from 'node:path'
+import type { WebhookEvent } from '@octokit/webhooks-types'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
+import { run } from '../src/run.js'
+import { getOctokit, server } from './github.js'
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

@@ -1,11 +1,11 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import * as core from '@actions/core'
+import type { Octokit } from '@octokit/action'
 import { generateBake } from './bake.js'
 import { type CacheType, generateDockerFlags } from './docker.js'
+import type { Context } from './github.js'
 import { inferImageTags } from './infer.js'
-import { Octokit } from '@octokit/action'
-import { Context } from './github.js'
 
 type Inputs = {
   image: string

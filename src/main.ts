@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import type { CacheType } from './docker.js'
-import { run } from './run.js'
 import { getContext, getOctokit } from './github.js'
+import { run } from './run.js'
 
 const main = async (): Promise<void> => {
   if (core.getInput('tag-prefix')) {

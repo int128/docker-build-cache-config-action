@@ -1,6 +1,6 @@
 import assert from 'node:assert'
+import type { Octokit } from '@octokit/action'
 import type { Context } from './github.js'
-import { Octokit } from '@octokit/action'
 
 type Inputs = {
   image: string
