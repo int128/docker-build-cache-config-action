@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, expect, test } from 'vitest'
 import { inferImageTags } from '../src/infer.js'
 import { getOctokit, server } from './github.js'
+import { WebhookEvent } from '@octokit/webhooks-types'
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
@@ -82,25 +83,21 @@ test.each([
     },
   },
 ])('on pull_request with $description', async ({ inputs, expected }) => {
-  const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'pull_request',
-      ref: 'refs/pulls/123/merge',
-      payload: {
-        pull_request: {
-          number: 123,
-          base: {
-            ref: 'main',
-            repo: { default_branch: 'main' },
-          },
+  const tags = await inferImageTags(inputs, getOctokit(), {
+    eventName: 'pull_request',
+    ref: 'refs/pulls/123/merge',
+    payload: {
+      pull_request: {
+        number: 123,
+        base: {
+          ref: 'main',
+          repo: { default_branch: 'main' },
         },
       },
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
-    },
-    inputs,
-  )
+    } as WebhookEvent,
+    repo: { owner: 'int128', repo: 'sandbox' },
+    runnerTemp: '/runner/tmp',
+  })
   expect(tags).toStrictEqual(expected)
 })
 
@@ -138,25 +135,21 @@ test.each([
     },
   },
 ])('on pull_request to non-default branch with $description', async ({ inputs, expected }) => {
-  const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'pull_request',
-      ref: 'refs/pulls/123/merge',
-      payload: {
-        pull_request: {
-          number: 123,
-          base: {
-            ref: 'yet-another-base',
-            repo: { default_branch: 'main' },
-          },
+  const tags = await inferImageTags(inputs, getOctokit(), {
+    eventName: 'pull_request',
+    ref: 'refs/pulls/123/merge',
+    payload: {
+      pull_request: {
+        number: 123,
+        base: {
+          ref: 'yet-another-base',
+          repo: { default_branch: 'main' },
         },
       },
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
-    },
-    inputs,
-  )
+    } as WebhookEvent,
+    repo: { owner: 'int128', repo: 'sandbox' },
+    runnerTemp: '/runner/tmp',
+  })
   expect(tags).toStrictEqual(expected)
 })
 
@@ -190,24 +183,20 @@ test.each([
     },
   },
 ])('on issue_comment of pull request with $description', async ({ inputs, expected }) => {
-  const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'issue_comment',
-      ref: 'refs/pulls/123/merge',
-      payload: {
-        issue: {
-          number: 123,
-          pull_request: {
-            url: 'https://api.github.com/int128/sandbox/pulls/123',
-          },
+  const tags = await inferImageTags(inputs, getOctokit(), {
+    eventName: 'issue_comment',
+    ref: 'refs/pulls/123/merge',
+    payload: {
+      issue: {
+        number: 123,
+        pull_request: {
+          url: 'https://api.github.com/int128/sandbox/pulls/123',
         },
       },
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 123 },
-    },
-    inputs,
-  )
+    } as WebhookEvent,
+    repo: { owner: 'int128', repo: 'sandbox' },
+    runnerTemp: '/runner/tmp',
+  })
   expect(tags).toStrictEqual(expected)
 })
 
@@ -283,42 +272,41 @@ test.each([
     },
   },
 ])('on push branch with $description', async ({ inputs, expected }) => {
-  const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'push',
-      ref: 'refs/heads/main',
-      payload: {},
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
-    inputs,
-  )
+  const tags = await inferImageTags(inputs, getOctokit(), {
+    eventName: 'push',
+    ref: 'refs/heads/main',
+    payload: {
+      pusher: { name: 'octocat' },
+    } as WebhookEvent,
+    repo: { owner: 'int128', repo: 'sandbox' },
+    runnerTemp: '/runner/tmp',
+  })
   expect(tags).toStrictEqual(expected)
 })
 
 test('on push tag', async () => {
   const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'push',
-      ref: 'refs/tags/v1.0.0',
-      payload: {
-        repository: {
-          name: 'sandbox',
-          owner: { login: 'int128' },
-          default_branch: 'main',
-        },
-      },
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
       cacheKey: [],
       cacheKeyFallback: [],
+    },
+    getOctokit(),
+    {
+      eventName: 'push',
+      ref: 'refs/tags/v1.0.0',
+      payload: {
+        pusher: { name: 'octocat' },
+        repository: {
+          name: 'sandbox',
+          owner: { login: 'int128' },
+          default_branch: 'main',
+        },
+      } as WebhookEvent,
+      repo: { owner: 'int128', repo: 'sandbox' },
+      runnerTemp: '/runner/tmp',
     },
   )
   expect(tags).toStrictEqual({
@@ -329,20 +317,20 @@ test('on push tag', async () => {
 
 test('on schedule', async () => {
   const tags = await inferImageTags(
-    getOctokit(),
-    {
-      eventName: 'schedule',
-      ref: 'refs/heads/main',
-      payload: {},
-      repo: { owner: 'int128', repo: 'sandbox' },
-      issue: { owner: 'int128', repo: 'sandbox', number: 0 },
-    },
     {
       image: 'ghcr.io/int128/sandbox/cache',
       flavor: [],
       pullRequestCache: false,
       cacheKey: [],
       cacheKeyFallback: [],
+    },
+    getOctokit(),
+    {
+      eventName: 'schedule',
+      ref: 'refs/heads/main',
+      payload: {} as WebhookEvent,
+      repo: { owner: 'int128', repo: 'sandbox' },
+      runnerTemp: '/runner/tmp',
     },
   )
   expect(tags).toStrictEqual({

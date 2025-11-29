@@ -1,5 +1,6 @@
-import type { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
-import type { Context, Octokit } from './github.js'
+import assert from 'node:assert'
+import type { Context } from './github.js'
+import { Octokit } from '@octokit/action'
 
 type Inputs = {
   image: string
@@ -14,9 +15,9 @@ type Cache = {
   to: string[]
 }
 
-export const inferImageTags = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
+export const inferImageTags = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Cache> => {
   const flavor = parseFlavor(inputs.flavor)
-  const keys = await inferCacheKeys(octokit, context, inputs)
+  const keys = await inferCacheKeys(inputs, octokit, context)
   return {
     from: unique(
       keys.from.map((from) => `${inputs.image}:${escapeImageTag(`${flavor.prefix}${from}${flavor.suffix}`)}`),
@@ -44,16 +45,15 @@ const parseFlavor = (flavor: string[]) => {
   return { prefix, suffix }
 }
 
-const inferCacheKeys = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
-  switch (context.eventName) {
-    case 'issue_comment':
-      return inferIssueCommentBranch(octokit, context, inputs)
-
-    case 'pull_request':
-      return inferPullRequestBranch(context, inputs)
-
-    case 'push':
-      return inferPushBranch(context, inputs)
+const inferCacheKeys = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Cache> => {
+  if ('issue' in context.payload) {
+    return inferIssueEvent(inputs, octokit, context)
+  }
+  if ('pull_request' in context.payload) {
+    return inferPullRequestEvent(context.payload.pull_request, inputs)
+  }
+  if ('pusher' in context.payload) {
+    return inferPushEvent(context, inputs)
   }
 
   if (inputs.cacheKeyFallback.length > 0) {
@@ -68,9 +68,10 @@ const inferCacheKeys = async (octokit: Octokit, context: Context, inputs: Inputs
   }
 }
 
-const inferIssueCommentBranch = async (octokit: Octokit, context: Context, inputs: Inputs): Promise<Cache> => {
-  const payload = context.payload as IssueCommentEvent
-  if (!payload.issue.pull_request?.url) {
+const inferIssueEvent = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Cache> => {
+  assert('issue' in context.payload)
+
+  if (!context.payload.issue.pull_request) {
     if (inputs.cacheKeyFallback.length > 0) {
       return {
         from: inputs.cacheKeyFallback,
@@ -78,7 +79,7 @@ const inferIssueCommentBranch = async (octokit: Octokit, context: Context, input
       }
     }
     return {
-      from: [payload.repository.default_branch],
+      from: [context.payload.repository.default_branch],
       to: [],
     }
   }
@@ -86,14 +87,9 @@ const inferIssueCommentBranch = async (octokit: Octokit, context: Context, input
   const { data: pull } = await octokit.rest.pulls.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    pull_number: context.issue.number,
+    pull_number: context.payload.issue.number,
   })
-  return inferPullRequestData(pull, inputs)
-}
-
-const inferPullRequestBranch = (context: Context, inputs: Inputs): Cache => {
-  const payload = context.payload as PullRequestEvent
-  return inferPullRequestData(payload.pull_request, inputs)
+  return inferPullRequestEvent(pull, inputs)
 }
 
 type PullRequest = {
@@ -104,7 +100,7 @@ type PullRequest = {
   number: number
 }
 
-const inferPullRequestData = (pull: PullRequest, inputs: Inputs): Cache => {
+const inferPullRequestEvent = (pull: PullRequest, inputs: Inputs): Cache => {
   if (!inputs.pullRequestCache) {
     if (inputs.cacheKeyFallback.length > 0) {
       return {
@@ -140,7 +136,9 @@ const inferPullRequestData = (pull: PullRequest, inputs: Inputs): Cache => {
   }
 }
 
-const inferPushBranch = (context: Context, inputs: Inputs): Cache => {
+const inferPushEvent = (context: Context, inputs: Inputs): Cache => {
+  assert('pusher' in context.payload)
+
   // branch push
   if (context.ref.startsWith('refs/heads/')) {
     if (inputs.cacheKey.length > 0) {
@@ -163,9 +161,8 @@ const inferPushBranch = (context: Context, inputs: Inputs): Cache => {
       to: [],
     }
   }
-  const payload = context.payload as PushEvent
   return {
-    from: [payload.repository.default_branch],
+    from: [context.payload.repository.default_branch],
     to: [],
   }
 }

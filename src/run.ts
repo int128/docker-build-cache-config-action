@@ -3,8 +3,9 @@ import * as path from 'node:path'
 import * as core from '@actions/core'
 import { generateBake } from './bake.js'
 import { type CacheType, generateDockerFlags } from './docker.js'
-import { type Context, getRunnerTemp, type Octokit } from './github.js'
 import { inferImageTags } from './infer.js'
+import { Octokit } from '@octokit/action'
+import { Context } from './github.js'
 
 type Inputs = {
   image: string
@@ -16,8 +17,6 @@ type Inputs = {
   extraCacheFrom: string
   extraCacheTo: string
   bakeTarget: string
-  context: Context
-  octokit: Octokit
 }
 
 type Outputs = {
@@ -26,14 +25,18 @@ type Outputs = {
   bakeFile: string
 }
 
-export const run = async (inputs: Inputs): Promise<Outputs> => {
-  const tags = await inferImageTags(inputs.octokit, inputs.context, {
-    image: inputs.image,
-    flavor: inputs.flavor,
-    pullRequestCache: inputs.pullRequestCache,
-    cacheKey: inputs.cacheKey,
-    cacheKeyFallback: inputs.cacheKeyFallback,
-  })
+export const run = async (inputs: Inputs, octokit: Octokit, context: Context): Promise<Outputs> => {
+  const tags = await inferImageTags(
+    {
+      image: inputs.image,
+      flavor: inputs.flavor,
+      pullRequestCache: inputs.pullRequestCache,
+      cacheKey: inputs.cacheKey,
+      cacheKeyFallback: inputs.cacheKeyFallback,
+    },
+    octokit,
+    context,
+  )
   core.info(`Inferred cache-from: ${tags.from.join(', ')}`)
   core.info(`Inferred cache-to: ${tags.to.join(', ')}`)
   const dockerFlags = generateDockerFlags({
@@ -49,7 +52,7 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
   core.info(JSON.stringify(bake, undefined, 2))
   core.endGroup()
 
-  const tempDir = await fs.mkdtemp(path.join(getRunnerTemp(), 'docker-build-cache-config-action-'))
+  const tempDir = await fs.mkdtemp(path.join(context.runnerTemp, 'docker-build-cache-config-action-'))
   const bakeFile = `${tempDir}/docker-build-cache-config-action-bake.json`
   await fs.writeFile(bakeFile, JSON.stringify(bake))
   return {
