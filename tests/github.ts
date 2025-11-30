@@ -1,4 +1,4 @@
-import * as github from '@actions/github'
+import { Octokit } from '@octokit/action'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
@@ -23,4 +23,8 @@ export const server = setupServer(
   ),
 )
 
-export const getOctokit = () => github.getOctokit('GITHUB_TOKEN', { request: { fetch } })
+export const getOctokit = () =>
+  new Octokit({
+    authStrategy: null,
+    request: { fetch },
+  })

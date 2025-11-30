@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import type { CacheType } from './docker.js'
+import { getContext, getOctokit } from './github.js'
 import { run } from './run.js'
 
 const main = async (): Promise<void> => {
@@ -11,19 +11,21 @@ const main = async (): Promise<void> => {
     throw new Error('tag-suffix is obsoleted, use flavor instead')
   }
 
-  const outputs = await run({
-    image: core.getInput('image', { required: true }),
-    cacheType: core.getInput('cache-type', { required: true }) as CacheType,
-    flavor: core.getMultilineInput('flavor'),
-    pullRequestCache: core.getBooleanInput('pull-request-cache'),
-    cacheKey: core.getMultilineInput('cache-key'),
-    cacheKeyFallback: core.getMultilineInput('cache-key-fallback'),
-    extraCacheFrom: core.getInput('extra-cache-from'),
-    extraCacheTo: core.getInput('extra-cache-to'),
-    bakeTarget: core.getInput('bake-target', { required: true }),
-    context: github.context,
-    octokit: github.getOctokit(core.getInput('token', { required: true })),
-  })
+  const outputs = await run(
+    {
+      image: core.getInput('image', { required: true }),
+      cacheType: core.getInput('cache-type', { required: true }) as CacheType,
+      flavor: core.getMultilineInput('flavor'),
+      pullRequestCache: core.getBooleanInput('pull-request-cache'),
+      cacheKey: core.getMultilineInput('cache-key'),
+      cacheKeyFallback: core.getMultilineInput('cache-key-fallback'),
+      extraCacheFrom: core.getInput('extra-cache-from'),
+      extraCacheTo: core.getInput('extra-cache-to'),
+      bakeTarget: core.getInput('bake-target', { required: true }),
+    },
+    getOctokit(),
+    await getContext(),
+  )
   core.info(`Setting outputs: ${JSON.stringify(outputs, undefined, 2)}`)
   core.setOutput('cache-from', outputs.cacheFrom)
   core.setOutput('cache-to', outputs.cacheTo)
