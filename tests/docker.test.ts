@@ -83,7 +83,7 @@ test('cache type', () => {
     extraCacheTo: '',
   })
   expect(outputs).toStrictEqual({
-    cacheFrom: ['type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1', 'type=gha,ref=ghcr.io/int128/sandbox/cache:main'],
-    cacheTo: ['type=gha,ref=ghcr.io/int128/sandbox/cache:pr-1,mode=max'],
+    cacheFrom: ['type=gha,scope=ghcr.io/int128/sandbox/cache:pr-1', 'type=gha,scope=ghcr.io/int128/sandbox/cache:main'],
+    cacheTo: ['type=gha,scope=ghcr.io/int128/sandbox/cache:pr-1,mode=max'],
   })
 })
