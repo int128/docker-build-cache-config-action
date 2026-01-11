@@ -1,5 +1,5 @@
-import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
-import { Context, Octokit } from './github.js'
+import type { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
+import type { Context, Octokit } from './github.js'
 
 type Inputs = {
   image: string
@@ -18,12 +18,14 @@ export const inferImageTags = async (octokit: Octokit, context: Context, inputs:
   const flavor = parseFlavor(inputs.flavor)
   const keys = await inferCacheKeys(octokit, context, inputs)
   return {
-    from: unique(keys.from.map((from) => `${inputs.image}:${escape(`${flavor.prefix}${from}${flavor.suffix}`)}`)),
-    to: unique(keys.to.map((to) => `${inputs.image}:${escape(`${flavor.prefix}${to}${flavor.suffix}`)}`)),
+    from: unique(
+      keys.from.map((from) => `${inputs.image}:${escapeImageTag(`${flavor.prefix}${from}${flavor.suffix}`)}`),
+    ),
+    to: unique(keys.to.map((to) => `${inputs.image}:${escapeImageTag(`${flavor.prefix}${to}${flavor.suffix}`)}`)),
   }
 }
 
-const escape = (s: string) => s.replaceAll(/[/]/g, '-')
+const escapeImageTag = (s: string) => s.replaceAll(/[/]/g, '-')
 
 const unique = <T>(a: T[]) => [...new Set(a)]
 

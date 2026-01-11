@@ -1,5 +1,5 @@
-import * as github from '@actions/github'
-import * as os from 'os'
+import * as os from 'node:os'
+import type * as github from '@actions/github'
 
 export type Octokit = ReturnType<typeof github.getOctokit>
 
