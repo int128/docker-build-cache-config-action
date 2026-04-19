@@ -60,8 +60,7 @@ jobs:
       - uses: docker/bake-action@a66e1c87e2eca0503c343edf1d208c716d54b8a8 # v7.1.0
         with:
           push: ${{ github.event_name == 'push' }}
-          workdir: tests/fixture
-          source: .
+          source: tests/fixture
           files: |
             ./docker-bake.hcl
             ${{ steps.metadata.outputs.bake-file }}
