@@ -6,12 +6,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { run } from '../src/run.js'
 import { getOctokit, server } from './github.js'
 
-let runnerTemp: string
+const runnerTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'runner-'))
 
-beforeAll(async () => {
-  server.listen()
-  runnerTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'runner-'))
-})
+beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(async () => {
   server.close()
