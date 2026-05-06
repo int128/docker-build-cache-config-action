@@ -6,11 +6,17 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { run } from '../src/run.js'
 import { getOctokit, server } from './github.js'
 
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+let runnerTemp: string
 
-const runnerTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'runner-'))
+beforeAll(async () => {
+  server.listen()
+  runnerTemp = await fs.mkdtemp(path.join(os.tmpdir(), 'runner-'))
+})
+afterEach(() => server.resetHandlers())
+afterAll(async () => {
+  server.close()
+  await fs.rm(runnerTemp, { recursive: true, force: true })
+})
 
 describe('Basic usage', () => {
   test('push event of main branch', async () => {
